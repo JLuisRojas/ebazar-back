@@ -4,6 +4,7 @@
 
 
 require_once('../Models/Producto.php');
+require_once('../Models/Pregunta.php');
 require_once('../Models/DB.php');
 require_once('../Models/Response.php');
 
@@ -35,26 +36,62 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         
         }
 
-        $sql = 'SELECT * FROM productos WHERE id = 1';
+        // Consulta el producto
+        $sql = "SELECT * FROM productos WHERE id = $producto_id";
         $query = $connection->prepare($sql);
         $query->execute();
 
+        // Si no existe producto resulta en un error
         $rowCount = $query->rowCount();
-        while($row = $query->fetch(PDO::FETCH_ASSOC)){
-            $producto = new Producto($row['id'], $row['id_usuario'], $row['id_departamento'], $row['titulo'], 
-                                    $row['ubicacion'], $row['descripcion_corta'], $row['descripcion_larga'],
-                                    $row['precio'], $row['vendidos'], $row['disponibles'], $row['caracteristicas'],
-                                    $row['habilitado'], $row['img'], $row['comentarios']);
+        if($rowCount === 0) {
+            $response = new Response();
+            $response->setHttpCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("No existe el producto con id: $producto_id");
+            $response->send();
+            exit();
         }
 
-        // Obtener comentarios
+        while($row = $query->fetch(PDO::FETCH_ASSOC)){
+            $producto = Producto::fromArray($row);
+        }
 
-        $returnData['producto'] = $producto->getArray();
+        // Obtener preguntas
+        $sqlPreguntas = "SELECT * FROM Preguntas WHERE id_producto = $producto_id";
+        $queryPreguntas = $connection->prepare($sqlPreguntas);
+        $queryPreguntas->execute();
+
+        $preguntas = array();
+        while($row = $queryPreguntas->fetch(PDO::FETCH_ASSOC)){
+            $pregunta = Pregunta::fromArray($row);
+            $preguntas[] = $pregunta->getArray();
+        }
+
+        // Formato de los datos del producto
+        $productoData = $producto->getArray();
+        $productoData = [
+            'titulo' => $productoData['titulo'],
+            'precio' => $productoData['precio'],
+            'disponibles' => $productoData['disponibles'],
+            'ubicacion' => $productoData['ubicacion'],
+            'descripcion_corta' => $productoData['descripcion_corta'],
+            'descripcion_larga' => $productoData['descripcion_corta'],
+            'caracteristicas' => $productoData['caracteristicas'],
+            'preguntas' => array_map(function($pregunta) {
+                return [
+                    'pregunta' => $pregunta['pregunta'],
+                    'fecha' => $pregunta['fecha_pregunta'],
+                    'respuesta' => $pregunta['respuesta']
+                ];
+            }, $preguntas)
+        ];
+
+        // Response todo bien
+        $returnData['producto'] = $productoData;
         $response = new Response();
         $response->setHttpCode(200);
         $response->setSuccess(true);
         $response->setData($returnData);
-        //$response->setToCache(true);
         $response->send();
         exit();
     } else {

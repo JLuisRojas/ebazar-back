@@ -37,6 +37,13 @@ class Producto {
     $this->setComentarios($comentarios);
   }
 
+  public static function fromArray($arr) {
+    return new Producto($arr['id'], $arr['id_usuario'], $arr['id_departamento'], $arr['titulo'], 
+                        $arr['ubicacion'], $arr['descripcion_corta'], $arr['descripcion_larga'],
+                        $arr['precio'], $arr['vendidos'], $arr['disponibles'], $arr['caracteristicas'],
+                        $arr['habilitado'], $arr['img'], $arr['comentarios']);
+  }
+
   public function setId($id) {
     if($id === null || !is_numeric($id) || !is_integer($id) || $id <= 0 ||  $id >= 2137483647 || $this->_id !== null ){
       throw new ProductoException("Error en ID del producto");
@@ -144,7 +151,7 @@ class Producto {
   }
 
   public function setCaracteristicas($caracteristicas) {
-    $this->_caracteristicas = $caracteristicas;
+    $this->_caracteristicas = json_decode($caracteristicas);
   }
   public function getCaracteristicas() {
     return $this->_caracteristicas;

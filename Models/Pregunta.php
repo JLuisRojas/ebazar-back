@@ -20,6 +20,24 @@ class Pregunta {
         $this->setFechaRespuesta($fecha_respuesta);
     }
 
+    public function getArray() {
+        $pregunta = array();
+    
+        $pregunta['id_producto'] = $this->getIdProducto();
+        $pregunta['id_usuario'] = $this->getIdUsuario();
+        $pregunta['pregunta'] = $this->getPregunta();
+        $pregunta['respuesta'] = $this->getRespuesta();
+        $pregunta['fecha_pregunta'] = $this->getFechaPregunta();
+        $pregunta['fecha_respuesta'] = $this->getFechaRespuesta();
+    
+        return $pregunta;
+    }
+
+    public static function fromArray($arr) {
+        return new Pregunta($arr['id_producto'], $arr['id_usuario'], $arr['pregunta'], $arr['respuesta'], 
+                            $arr['fecha_pregunta'], $arr['fecha_respuesta']);
+      }
+
     public function setIdProducto($id_producto) {
         $this->_id_producto = $id_producto;
     }
