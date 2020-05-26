@@ -10,3 +10,6 @@ RewriteCond %(REQUEST_FILENAME) !-f
 RewriteRule ^productos$ Controllers/productoController.php [L]
 RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/tareasController.php?categoria_id=$1 [L]
 RewriteRule ^productos/producto_id=(.*)$ Controllers/tareasController.php?categoria_id=$1 [L]
+
+#Usuarios
+RewriteRule ^usuarios$ Controllers/usuariosController.php

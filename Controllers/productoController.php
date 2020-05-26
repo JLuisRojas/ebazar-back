@@ -14,7 +14,7 @@ try {
 catch(PDOException $e){
   error_log('Error de conexión: '. $e);
   $response = new Response();
-  $response->setHttpCode(500);
+  $response->setHttpStatusCode(500);
   $response->setSuccess(false);
   $response->addMessage("Error en la conexión a Base de datos");
   $response->send();
@@ -27,7 +27,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $producto_id = $_GET["producto_id"];
         if($producto_id == '' || !is_numeric($producto_id)){
             $response = new Response();
-            $response->setHttpCode(400);
+            $response->setHttpStatusCode(400);
             $response->setSuccess(false);
             $response->addMessage("El campo de producto id no puede estar vacio o ser diferente de un número");
             $response->send();
@@ -51,7 +51,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         $returnData['producto'] = $producto->getArray();
         $response = new Response();
-        $response->setHttpCode(200);
+        $response->setHttpStatusCode(200);
         $response->setSuccess(true);
         $response->setData($returnData);
         //$response->setToCache(true);
@@ -59,7 +59,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit();
     } else {
         $response = new Response();
-        $response->setHttpCode(400);
+        $response->setHttpStatusCode(400);
         $response->setSuccess(false);
         $response->addMessage("El metodo no tiene campo de id");
         $response->send();
@@ -71,7 +71,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 } else {
     $response = new Response();
-    $response->setHttpCode(405);
+    $response->setHttpStatusCode(405);
     $response->setSuccess(false);
     $response->addMessage("Método no permitido");
     $response->send();
