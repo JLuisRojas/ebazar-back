@@ -8,7 +8,8 @@ class Response {
     private $_toCache = false;
     private $_responseData = array();
 
-    public function setHttpCode($httpStatusCode) {
+    //Agregué Status
+    public function setHttpStatusCode($httpStatusCode) {
         $this->_httpStatusCode = $httpStatusCode;
     }
 
@@ -27,7 +28,7 @@ class Response {
     public function send() {
         header('Content-type: application/json;charset=utf8');
         if($this->_toCache == true) {
-            header('Cache-control: max-age=');
+            header('Cache-control: max-age=60');
         } else {
             header('Cache-control: no-cache, no-store');
         }
