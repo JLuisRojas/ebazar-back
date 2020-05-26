@@ -96,7 +96,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        $response->addMessage("El metodo no tiene campo de id");
+        $response->addMessage("El metodo no tiene campo de titulo a buscar");
         $response->send();
         exit();
     }

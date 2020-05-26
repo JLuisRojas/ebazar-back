@@ -129,7 +129,7 @@ class Producto {
   }
 
   public function setVendidos($vendidos) {
-    if($vendidos === null || !is_numeric($vendidos) || !is_integer($vendidos) || $vendidos <= 0 ||  $vendidos >= 2137483647){
+    if($vendidos === null || !is_numeric($vendidos) || !is_integer($vendidos) || $vendidos < 0 ||  $vendidos >= 2137483647){
       throw new ProductoException("Error en el numero de vendidos del producto");
     }
     

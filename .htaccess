@@ -15,6 +15,9 @@ RewriteRule ^productos/producto_id=(.*)$ Controllers/tareasController.php?catego
 RewriteRule ^buscar$ Controllers/buscarController.php [L]
 RewriteRule ^buscar/titulo=(.*)$ Controllers/buscarController.php?titulo=$1 [L]
 
+# Carrito
+RewriteRule ^carrito$ Controllers/carritoController.php [L]
+RewriteRule ^carrito/id_usuario=(.*)$ Controllers/carritoController.php?id_usuario=$1 [L]
 
 #Usuarios
 RewriteRule ^usuarios$ Controllers/usuariosController.php
