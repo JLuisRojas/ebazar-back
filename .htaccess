@@ -6,10 +6,15 @@ RewriteCond %(REQUEST_FILENAME) !-f
 #Categorias 
 #RewriteRule ^categorias$ Controllers/categoriasController.php [L]
 
-#Tareas
+#Productos
 RewriteRule ^productos$ Controllers/productoController.php [L]
 RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/tareasController.php?categoria_id=$1 [L]
 RewriteRule ^productos/producto_id=(.*)$ Controllers/tareasController.php?categoria_id=$1 [L]
+
+# Buscar
+RewriteRule ^buscar$ Controllers/buscarController.php [L]
+RewriteRule ^buscar/titulo=(.*)$ Controllers/buscarController.php?titulo=$1 [L]
+
 
 #Usuarios
 RewriteRule ^usuarios$ Controllers/usuariosController.php

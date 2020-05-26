@@ -91,14 +91,14 @@ class Producto {
     if($ubicacion === null || strlen($ubicacion) > 70 || strlen($ubicacion) < 1) {
       throw new ProductoException("Error en la ubicacion del producto");
     }
-    $this->_titulo = $ubicacion;
+    $this->_ubicacion = $ubicacion;
   }
   public function getUbicacion() {
     return $this->_ubicacion;
   }
 
   public function setDescripcionCorta($descripcion_corta) {
-    if($descripcion_corta !== null && strlen($descripcion_corta) > 50) {
+    if($descripcion_corta !== null && strlen($descripcion_corta) > 300) {
       throw new ProductoException("Error en descripción corta de la producto");
     }
     $this->_descripcion_corta = $descripcion_corta;
@@ -108,7 +108,7 @@ class Producto {
   }
 
   public function setDescripcionLarga($descripcion_larga) {
-    if($descripcion_larga !== null && strlen($descripcion_larga) > 150) {
+    if($descripcion_larga !== null && strlen($descripcion_larga) > 800) {
       throw new ProductoException("Error en descripción larga del prodcuto");
     }
     $this->_descripcion_larga = $descripcion_larga;
@@ -197,8 +197,8 @@ class Producto {
     $producto['disponibles'] = $this->getDisponibles();
     $producto['caracteristicas'] = $this->getCaracteristicas();
     $producto['habilitado'] = $this->getHabilitado();
-    //$producto['img'] = $this->getImg();
     $producto['comentarios'] = $this->getComentarios();
+
 
     return $producto;
   }

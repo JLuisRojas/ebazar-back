@@ -75,7 +75,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             'disponibles' => $productoData['disponibles'],
             'ubicacion' => $productoData['ubicacion'],
             'descripcion_corta' => $productoData['descripcion_corta'],
-            'descripcion_larga' => $productoData['descripcion_corta'],
+            'descripcion_larga' => $productoData['descripcion_larga'],
             'caracteristicas' => $productoData['caracteristicas'],
             'preguntas' => array_map(function($pregunta) {
                 return [
