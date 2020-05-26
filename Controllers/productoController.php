@@ -1,6 +1,7 @@
 <?php
 // Controlador del producto
 // el cual se encarga de las siguientes rutas
+// FALTA TRY DE CREAR PRODUCTO Y RESPUESTA
 
 
 require_once('../Models/Producto.php');

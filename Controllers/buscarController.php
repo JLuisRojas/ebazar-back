@@ -1,5 +1,6 @@
 <?php
 // Metodo que realiza la busqueda de productos en la base de datos
+// FALTA TRY DE CREAR PRODUCTO
 
 require_once('../Models/Producto.php');
 require_once('../Models/DB.php');
