@@ -2,6 +2,7 @@
 // Controlador del producto
 // el cual se encarga de las siguientes rutas
 // FALTA TRY DE CREAR PRODUCTO Y RESPUESTA
+echo 'Hola';
 
 
 require_once('../Models/Producto.php');
@@ -95,11 +96,68 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response->setData($returnData);
         $response->send();
         exit();
-    } else {
+    }
+    // Checa si se estan pidiendo productos del vendedor 
+    elseif(array_key_exists('id_vendedor', $_GET)) {
+        $id_vendedor = $_GET["id_vendedor"];
+        if($id_vendedor == '' || !is_numeric($id_vendedor)){
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("El campo de id de vendedor no puede estar vacio o ser diferente de un número");
+            $response->send();
+            exit();
+        
+        }
+
+        // TODO: Verificar que el usuario exista
+
+        // Consulta el producto
+        $sql = "SELECT * FROM productos WHERE id_usuario = $id_vendedor";
+        $query = $connection->prepare($sql);
+        $query->execute();
+
+        // Si no existe producto resulta en un error
+        $rowCount = $query->rowCount();
+        if($rowCount === 0) {
+            $response = new Response();
+            $response->setHttpCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("No existe el producto con id: $id_vendedor");
+            $response->send();
+            exit();
+        }
+
+        $productos = array();
+        while($row = $query->fetch(PDO::FETCH_ASSOC)){
+            $producto = Producto::fromArray($row);
+            $productos[] = $producto->getArray();
+        }
+
+        $productos = array_map(function($producto) {
+            return [
+                'id' => $producto['id'],
+                'titulo' => $producto['titulo'],
+                'precio' => $producto['precio'],
+                'vendidos' => $producto['vendidos'],
+                'comentarios' => $producto['comentarios']
+            ];
+        }, $productos);
+
+        // Response todo bien
+        $returnData['productos'] = $productos;
+        $response = new Response();
+        $response->setHttpStatusCode(200);
+        $response->setSuccess(true);
+        $response->setData($returnData);
+        $response->send();
+        exit();
+    }
+     else {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        $response->addMessage("El metodo no tiene campo de id");
+        $response->addMessage("El metodo no tiene campo de id (vendedor o producto)");
         $response->send();
         exit();
     }
@@ -212,7 +270,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response = new Response ();
         $response->setHttpStatusCode(201);
         $response->setSuccess(true);
-        $response->addMessage("Descripcion creada");
+        $response->addMessage("Producto creado");
         $response->setData($returnData);
         $response->send();
         exit();
