@@ -287,6 +287,283 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit();
     }
 
+}
+// Actializar info del producto 
+elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
+    if(!array_key_exists("producto_id", $_GET)) {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("El metodo no tiene campo de id de producto");
+        $response->send();
+        exit();
+    }
+
+    $producto_id = $_GET["producto_id"];
+    if($producto_id == '' || !is_numeric($producto_id)){
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("El campo de producto id no puede estar vacio o ser diferente de un número");
+        $response->send();
+        exit();
+    }
+
+    try {
+        if ($_SERVER['CONTENT_TYPE'] !== 'application/json'){
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage('Encabezado "Content type" no es JSON');
+            $response->send();
+            exit();
+        }
+
+        $patchData = file_get_contents('php://input');
+
+        if (!$json_data = json_decode($patchData)) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage('El cuerpo de la solicitud no es un JSON válido');
+            $response->send();
+            exit();
+        }
+
+        /**
+         * FORMATO DEL JSON
+         * 
+         * __Todos estos campo son opcionales__
+         * id_departamento: int
+         * titulo: string
+         * ubicacion: string
+         * descripcion_corta: string
+         * descripcion_larga: string
+         * precio: float
+         * disponibles: int
+         * caracteristicas: JSON
+         * habilitado: boolean
+         */
+
+        $actualiza_id_departamento = false;
+        $actualiza_titulo = false;
+        $actualiza_ubicacion = false;
+        $actualiza_descripcion_corta = false;
+        $actualiza_descripcion_larga = false;
+        $actualiza_precio = false;
+        $actualiza_disponibles = false;
+        $actualiza_caracteristicas = false;
+        $actualiza_habilitado = false;
+
+
+        $campos_query = "";
+
+        if (isset($json_data->id_departamento)) {
+            $actualiza_id_departamento = true;
+            $campos_query .= "id_departamento = :id_departamento, ";
+        }
+
+        if (isset($json_data->titulo)) {
+            $actualiza_titulo = true;
+            $campos_query .= "titulo = :titulo, ";
+        }
+
+        if (isset($json_data->ubicacion)) {
+            $actualiza_ubicacion = true;
+            $campos_query .= "ubicacion = :ubicacion, ";
+        }
+
+        if (isset($json_data->descripcion_corta)) {
+            $actualiza_descripcion_corta = true;
+            $campos_query .= 'descripcion_corta = :descripcion_corta, ';
+        }
+
+        if (isset($json_data->descripcion_larga)) {
+            $actualiza_descripcion_larga = true;
+            $campos_query .= "descripcion_larga = :descripcion_larga, ";
+        }
+
+        if (isset($json_data->precio)) {
+            $actualiza_precio = true;
+            $campos_query .= "precio = :precio, ";
+        }
+
+        if (isset($json_data->disponibles)) {
+            $actualiza_disponibles = true;
+            $campos_query .= "disponibles = :disponibles, ";
+        }
+
+        if (isset($json_data->caracteristicas)) {
+            $actualiza_caracteristicas = true;
+            $campos_query .= "caracteristicas = :caracteristicas, ";
+        }
+
+        if (isset($json_data->habilitado)) {
+            $actualiza_habilitado = true;
+            $campos_query .= "habilitado = :habilitado, ";
+        }
+
+        $campos_query = rtrim($campos_query, ", ");
+
+        if ($actualiza_id_departamento === false 
+        && $actualiza_titulo === false 
+        && $actualiza_ubicacion === false 
+        && $actualiza_descripcion_corta === false 
+        && $actualiza_descripcion_larga === false
+        && $actualiza_precio === false 
+        && $actualiza_disponibles === false 
+        && $actualiza_caracteristicas === false 
+        && $actualiza_habilitado === false) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("No hay campos para actualizar");
+            $response->send();
+            exit();
+        }
+
+        $query = $connection->prepare('SELECT * FROM productos WHERE id = :id');
+        $query->bindParam(':id', $producto_id, PDO::PARAM_INT);
+        $query->execute();
+
+        $rowCount = $query->rowCount();
+
+        if($rowCount === 0) {
+            $response = new Response();
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("No se encontró el producto");
+            $response->send();
+            exit();
+        }
+
+        while($row = $query->fetch(PDO::FETCH_ASSOC)){
+            $producto = Producto::fromArray($row);
+        }
+
+        $cadena_query = 'UPDATE productos SET ' . $campos_query . ' WHERE id = :id';
+        $query = $connection->prepare($cadena_query);
+
+        if($actualiza_id_departamento === true) {
+            $producto->setIdDepartamento($json_data->id_departamento);
+            $up_id_departamento = $producto->getIdDepartamento();
+            $query->bindParam(':id_departamento', $up_id_departamento, PDO::PARAM_INT);
+        }
+
+        if($actualiza_titulo === true) {
+            $producto->setTitulo($json_data->titulo);
+            $up_titulo = $producto->getTitulo();
+            $query->bindParam(':titulo', $up_titulo, PDO::PARAM_STR);
+        }
+
+        if($actualiza_ubicacion === true) {
+            $producto->setUbicacion($json_data->ubicacion);
+            $up_ubicacion = $producto->getUbicacion();
+            $query->bindParam(':ubicacion', $up_ubicacion, PDO::PARAM_STR);
+        }
+
+        if($actualiza_descripcion_corta === true) {
+            $producto->setDescripcionCorta($json_data->descripcion_corta);
+            $up_descripcion_corta = $producto->getDescripcionCorta();
+            $query->bindParam(':descripcion_corta', $up_descripcion_corta, PDO::PARAM_STR);
+        }
+
+        if($actualiza_descripcion_larga === true) {
+            $producto->setDescripcionLarga($json_data->descripcion_larga);
+            $up_descripcion_larga = $producto->getDescripcionLarga();
+            $query->bindParam(':descripcion_larga', $up_descripcion_larga, PDO::PARAM_STR);
+        }
+
+        if($actualiza_precio === true) {
+            $producto->setPrecio($json_data->precio);
+            $up_precio = $producto->getPrecio();
+            $query->bindParam(':precio', $up_precio, PDO::PARAM_FLOAT);
+        }
+
+        if($actualiza_disponibles === true) {
+            $producto->setDisponibles($json_data->disponibles);
+            $up_disponibles = $producto->getDisponibles();
+            $query->bindParam(':disponibles', $up_disponibles, PDO::PARAM_INT);
+        }
+
+        if($actualiza_caracteristicas === true) {
+            $producto->setCaracteristicas($json_data->caracteristicas);
+            $up_caracteristicas = json_encode($producto->getCaracteristicas());
+            $query->bindParam(':caracteristicas', $up_caracteristicas, PDO::PARAM_STR);
+        }
+
+        if($actualiza_habilitado === true) {
+            $producto->setHabilitado($json_data->habilitado);
+            $up_habilitado = $producto->getHabilitado();
+            $query->bindParam(':habilitado', $up_habilitado, PDO::PARAM_BOOL);
+        }
+
+        $query->bindParam(':id', $producto_id, PDO::PARAM_INT);
+        $query->execute();
+
+        $rowCount = $query->rowCount();
+
+        if ($rowCount === 0) {
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Error al actualizar el producto");
+            $response->send();
+            exit();
+        }
+
+        $query = $connection->prepare('SELECT * FROM productos WHERE id = :id');
+        $query->bindParam(':id', $producto_id, PDO::PARAM_INT);
+        $query->execute();
+
+        $rowCount = $query->rowCount();
+
+        if($rowCount === 0) {
+            $response = new Response();
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("No se encontró el producto después de actulizar");
+            $response->send();
+            exit();
+        }
+
+        $productos = array();
+
+        while($row = $query->fetch(PDO::FETCH_ASSOC)){
+            $producto = Producto::fromArray($row);
+            $productos[] = $producto->getArray();
+        }
+
+        $returnData = array();
+        $returnData['total_registros'] = $rowCount;
+        $returnData['productos'] = $productos;
+
+        $response = new Response();
+        $response->setHttpStatusCode(200);
+        $response->setSuccess(true);
+        $response->addMessage("Producto actualizado");
+        $response->setData($returnData);
+        $response->send();
+        exit();
+    }
+    catch(ProductoException $e) {
+        $response = new Response();
+        $response->setHttpStatusCode(500);
+        $response->setSuccess(false);
+        $response->addMessage($e->getMessage());
+        $response->send();
+        exit();
+    }
+    catch(PDOException $e) {
+        error_log("Error en BD - " . $e);
+
+        $response = new Response();
+        $response->setHttpStatusCode(500);
+        $response->setSuccess(false);
+        $response->addMessage("Error en BD al actualizar la tarea");
+        $response->send();
+        exit();
+    }
 } else {
     $response = new Response();
     $response->setHttpStatusCode(405);
