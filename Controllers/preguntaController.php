@@ -401,7 +401,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     }
 
     try {
-        $query = $connection->prepare('DELETE FROM preguntas WHERE id = :id');
+        $query = $connection->prepare('DELETE FROM Preguntas WHERE id = :id');
         $query->bindParam(':id', $id_pregunta, PDO::PARAM_INT);
         $query->execute();
 
@@ -432,7 +432,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     
         $response->setHttpStatusCode(500);
         $response->setSuccess(false);
-        $response->addMessage("Error al eliminar la pregunta");
+        $response->addMessage("Error al eliminar la pregunta $e");
         $response->send();
         exit();
     }
