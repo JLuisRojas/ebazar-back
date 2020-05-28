@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 php_flag display_errors on
 
+=======
+>>>>>>> 28cb2aab12befe19262dc4813de6a802fdbbada4
 RewriteEngine On
 
 RewriteCond %(REQUEST_FILENAME) !-d
@@ -10,8 +13,9 @@ RewriteCond %(REQUEST_FILENAME) !-f
 
 #Productos
 RewriteRule ^productos$ Controllers/productoController.php [L]
-RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/tareasController.php?categoria_id=$1 [L]
-RewriteRule ^productos/producto_id=(.*)$ Controllers/tareasController.php?categoria_id=$1 [L]
+RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/productoController.php?categoria_id=$1 [L]
+RewriteRule ^productos/producto_id=(.*)$ Controllers/productoController.php?categoria_id=$1 [L]
+RewriteRule ^productos/id_vendedor=(.*)$ Controllers/productoController.php?id_vendedor=$1 [L]
 
 # Buscar
 RewriteRule ^buscar$ Controllers/buscarController.php [L]
