@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 php_flag display_errors on
 
-=======
->>>>>>> 28cb2aab12befe19262dc4813de6a802fdbbada4
 RewriteEngine On
 
 RewriteCond %(REQUEST_FILENAME) !-d

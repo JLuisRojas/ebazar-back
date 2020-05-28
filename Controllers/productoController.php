@@ -2,8 +2,6 @@
 // Controlador del producto
 // el cual se encarga de las siguientes rutas
 // FALTA TRY DE CREAR PRODUCTO Y RESPUESTA
-echo 'Hola';
-
 
 require_once('../Models/Producto.php');
 require_once('../Models/Pregunta.php');
@@ -564,7 +562,66 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
         $response->send();
         exit();
     }
-} else {
+}
+elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
+    if(!array_key_exists("producto_id", $_GET)) {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("El metodo no tiene campo de id de producto");
+        $response->send();
+        exit();
+    }
+
+    $producto_id = $_GET["producto_id"];
+    if($producto_id == '' || !is_numeric($producto_id)){
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("El campo de producto id no puede estar vacio o ser diferente de un número");
+        $response->send();
+        exit();
+    }
+
+    try {
+        $query = $connection->prepare('DELETE FROM productos WHERE id = :id');
+        $query->bindParam(':id', $producto_id, PDO::PARAM_INT);
+        $query->execute();
+
+        $rowCount = $query->rowCount();
+
+        if ($rowCount === 0) {
+            $response = new Response();
+    
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("Producto no encontrado");
+            $response->send();
+            exit();
+        }
+
+        $response = new Response();
+    
+        $response->setHttpStatusCode(200);
+        $response->setSuccess(true);
+        $response->addMessage("Producto eliminado");
+        $response->send();
+        exit();
+    }
+    catch (PDOException $e) {
+        error_log("Error en DB - ".$e, 0);
+    
+        $response = new Response();
+    
+        $response->setHttpStatusCode(500);
+        $response->setSuccess(false);
+        $response->addMessage("Error al eliminar producto");
+        $response->send();
+        exit();
+    }
+
+
+}  else {
     $response = new Response();
     $response->setHttpStatusCode(405);
     $response->setSuccess(false);
