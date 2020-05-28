@@ -1,4 +1,6 @@
-RewriteEngine off
+php_flag display_errors on
+
+RewriteEngine On
 
 RewriteCond %(REQUEST_FILENAME) !-d
 RewriteCond %(REQUEST_FILENAME) !-f
@@ -20,4 +22,5 @@ RewriteRule ^carrito$ Controllers/carritoController.php [L]
 RewriteRule ^carrito/id_usuario=(.*)$ Controllers/carritoController.php?id_usuario=$1 [L]
 
 #Usuarios
-RewriteRule ^usuarios$ Controllers/usuariosController.php
+RewriteRule ^usuarios$ Controllers/usuariosController.php [L]
+RewriteRule ^usuarios/id_usuario=([0-9]+)$ Controllers/usuariosController.php?id_usuario=$1 [L]

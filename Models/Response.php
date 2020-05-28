@@ -25,6 +25,10 @@ class Response {
         $this->_messages[] = $message;
     }
 
+    public function setToCache($toCache) {
+        $this->_toCache = $toCache;
+    }
+
     public function send() {
         header('Content-type: application/json;charset=utf8');
         if($this->_toCache == true) {

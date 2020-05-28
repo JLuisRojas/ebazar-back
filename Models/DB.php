@@ -32,9 +32,9 @@ class DB{
   {
       if(self::$connection === null)
       {
-          self::$connection = new PDO('mysql:host=localhost;dbname=ebazar;charset=utf8','root','');
+          //self::$connection = new PDO('mysql:host=localhost;dbname=ebazar2.0;charset=utf8','root','');
           //La linea de abajo ya funciona :D
-          //self::$connection = new PDO('mysql:host=localhost;dbname=id13861275_ebazar;charset=utf8','id13861275_root','Fundamentos$$$99');
+          self::$connection = new PDO('mysql:host=localhost;dbname=id13861275_ebazar;charset=utf8','id13861275_root','Fundamentos$$$99');
           self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
           self::$connection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
       }
