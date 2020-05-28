@@ -14,6 +14,13 @@ RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/productoController.php?
 RewriteRule ^productos/producto_id=(.*)$ Controllers/productoController.php?categoria_id=$1 [L]
 RewriteRule ^productos/id_vendedor=(.*)$ Controllers/productoController.php?id_vendedor=$1 [L]
 
+#Preguntas
+RewriteRule ^preguntas$ Controllers/preguntaController.php [L]
+RewriteRule ^preguntas?id_producto=([0-9]+)$ Controllers/preguntaController.php?id_producto=$1 [L]
+RewriteRule ^preguntas/id_producto=(.*)$ Controllers/preguntaController.php?id_producto=$1 [L]
+RewriteRule ^preguntas?id_pregunta=([0-9]+)$ Controllers/preguntaController.php?id_pregunta=$1 [L]
+RewriteRule ^preguntas/id_pregunta=(.*)$ Controllers/preguntaController.php?id_pregunta=$1 [L]
+
 # Buscar
 RewriteRule ^buscar$ Controllers/buscarController.php [L]
 RewriteRule ^buscar/titulo=(.*)$ Controllers/buscarController.php?titulo=$1 [L]

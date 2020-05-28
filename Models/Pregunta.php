@@ -2,6 +2,7 @@
 class PreguntaException extends Exception { }
 
 class Pregunta { 
+    private $_id;
     private $_id_producto;
     private $_id_usuario;
     private $_pregunta;
@@ -9,9 +10,10 @@ class Pregunta {
     private $_fecha_pregunta;
     private $_fecha_respuesta;
 
-    public function __construct($id_producto, $id_usuario, $pregunta, $respuesta,
+    public function __construct($id, $id_producto, $id_usuario, $pregunta, $respuesta,
                                 $fecha_pregunta, $fecha_respuesta) {
         //
+        $this->setId($id);
         $this->setIdProducto($id_producto);
         $this->setIdUsuario($id_usuario);
         $this->setPregunta($pregunta);
@@ -22,7 +24,8 @@ class Pregunta {
 
     public function getArray() {
         $pregunta = array();
-    
+        
+        $pregunta['id'] = $this->getId();
         $pregunta['id_producto'] = $this->getIdProducto();
         $pregunta['id_usuario'] = $this->getIdUsuario();
         $pregunta['pregunta'] = $this->getPregunta();
@@ -34,9 +37,16 @@ class Pregunta {
     }
 
     public static function fromArray($arr) {
-        return new Pregunta($arr['id_producto'], $arr['id_usuario'], $arr['pregunta'], $arr['respuesta'], 
+        return new Pregunta($arr['id'], $arr['id_producto'], $arr['id_usuario'], $arr['pregunta'], $arr['respuesta'], 
                             $arr['fecha_pregunta'], $arr['fecha_respuesta']);
-      }
+    }
+
+    public function setId($id) {
+        $this->_id = $id;
+    }
+    public function getId() {
+        return $this->_id;
+    }
 
     public function setIdProducto($id_producto) {
         $this->_id_producto = $id_producto;
@@ -74,7 +84,7 @@ class Pregunta {
     }
 
     public function getFechaPregunta() {
-        return $this->_fecha_respuesta;
+        return $this->_fecha_pregunta;
     }
 
     public function setFechaRespuesta($fecha_respuesta) {
