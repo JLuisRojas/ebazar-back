@@ -45,7 +45,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $rowCount = $query->rowCount();
         if($rowCount === 0) {
             $response = new Response();
-            $response->setHttpCode(404);
+            $response->setHttpStatusCode(404);
             $response->setSuccess(false);
             $response->addMessage("No existe el producto con id: $producto_id");
             $response->send();
@@ -57,7 +57,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
 
         // Obtener preguntas
-        $sqlPreguntas = "SELECT * FROM Preguntas WHERE id_producto = $producto_id";
+        $sqlPreguntas = "SELECT * FROM Preguntas WHERE id_producto = $producto_id AND respuesta IS NOT NULL";
         $queryPreguntas = $connection->prepare($sqlPreguntas);
         $queryPreguntas->execute();
 
@@ -119,9 +119,9 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $rowCount = $query->rowCount();
         if($rowCount === 0) {
             $response = new Response();
-            $response->setHttpCode(404);
+            $response->setHttpStatusCode(404);
             $response->setSuccess(false);
-            $response->addMessage("No existe el producto con id: $id_vendedor");
+            $response->addMessage("No existen el producto con id: $id_vendedor");
             $response->send();
             exit();
         }

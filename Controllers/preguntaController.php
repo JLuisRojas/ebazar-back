@@ -44,7 +44,6 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             $response->addMessage("El campo de producto id no puede estar vacio o ser diferente de un número");
             $response->send();
             exit();
-        
         }
 
         // Consulta las preguntas
