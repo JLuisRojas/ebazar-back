@@ -9,18 +9,20 @@ class Usuario{
     private $_num_telefono;
     private $_domicilio;
     private $_nombre;
-    private $_direccion;
+    private $_nombre_usuario;
+    private $_foto_usuario;
     private $_email;
     private $_contrasena;
     private $_tipo_usuario;
 
-    public function __construct($id_usuario,$num_telefono,$domicilio,$nombre,$direccion,$email,$contrasena,$tipo_usuario)
+    public function __construct($id_usuario,$num_telefono,$domicilio,$nombre,$nombre_usuario,$foto_usuario,$email,$contrasena,$tipo_usuario)
     {
         $this->setID($id_usuario);
         $this->setTelefono($num_telefono);
         $this->setDomicilio($domicilio);
         $this->setNombre($nombre);
-        $this->setDireccion($direccion);
+        $this->setNombreUsuario($nombre_usuario);
+        $this->setFoto($foto_usuario);
         $this->setEmail($email);
         $this->setContrasena($contrasena);
         $this->setTipoUsuario($tipo_usuario);
@@ -42,8 +44,12 @@ class Usuario{
         return $this->_nombre;
     }
 
-    public function getDireccion(){
-        return $this->_direccion;
+    public function getNombreUsuario(){
+        return $this->_nombre_usuario;
+    }
+
+    public function getFoto(){
+        return $this->_foto_usuario;
     }
 
     public function getEmail(){
@@ -90,9 +96,16 @@ class Usuario{
         $this->_nombre = $nombre;
     }
 
-    public function setDireccion($direccion)
+    public function setNombreUsuario($nombre_usuario){
+        if($nombre_usuario === null || strlen($nombre_usuario) > 50 || strlen($nombre_usuario) < 1){
+            throw new UsuarioException("Error de Nombre Usuario en usuario");
+        }
+        $this->_nombre_usuario = $nombre_usuario;
+    }
+
+    public function setFoto($foto_usuario)
     {
-        $this->_direccion = $direccion;
+        $this->_foto_usuario = $foto_usuario;
     }
 
     public function setEmail($email){
@@ -128,7 +141,8 @@ class Usuario{
         $usuario['num_telefono'] = $this->getTelefono();
         $usuario['domicilio'] = $this->getDomicilio();
         $usuario['nombre'] = $this->getNombre();
-        $usuario['direccion'] = $this->getDireccion();
+        $usuario['nombre_usuario'] = $this->getNombreUsuario();
+        $usuario['foto_usuario'] = $this->getFoto();
         $usuario['email'] = $this->getEmail();
         $usuario['contrasena'] = $this->getContrasena();
         $usuario['tipo_usuario'] = $this->getTipoUsuario();
