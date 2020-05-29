@@ -1,6 +1,14 @@
 php_flag display_errors on
 
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS, DELETE, PATCH"
+Header always set Access-Control-Allow-Headers "Content-type, Authorization"
+
 RewriteEngine On
+
+# Cosas raras
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
 
 RewriteCond %(REQUEST_FILENAME) !-d
 RewriteCond %(REQUEST_FILENAME) !-f

@@ -15,6 +15,7 @@
  *      Cuando el vendedor borra una pregunta
  */
 
+require_once('../Models/Producto.php');
 require_once('../Models/Pregunta.php');
 require_once('../Models/DB.php');
 require_once('../Models/Response.php');
@@ -47,7 +48,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
 
         // Consulta las preguntas
-        $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d %H:%i') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM Preguntas WHERE id_producto = $id_producto";
+        $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM Preguntas WHERE id_producto = $id_producto";
         $query = $connection->prepare($sql);
         $query->execute();
 
@@ -60,6 +61,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         // Formato de las preguntas
         $preguntas = array_map(function($pregunta) {
             $res = array();
+            $res['id'] =    $pregunta['id'];
             $res['pregunta'] = $pregunta['pregunta']; 
             $res['fechaPregunta'] = $pregunta['fecha_pregunta'];
 
@@ -145,6 +147,25 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Crea el producto en la BD
     try
     {
+        // Checa que exista el producto y le aumenta 1 al numero de preguntas
+        $query = $connection->prepare("SELECT * FROM productos WHERE id = $id_producto");
+        $query->execute();
+
+        $rowCount = $query->rowCount();
+
+        if($rowCount === 0) {
+            $response = new Response();
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("El producto no existe");
+            $response->send();
+            exit();
+        }
+
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $producto = Producto::fromArray($row);
+        }
+
         $query = $connection->prepare('INSERT INTO Preguntas (id_producto, id_usuario, pregunta, respuesta, fecha_pregunta, fecha_respuesta) VALUES (:id_producto, :id_usuario, :pregunta, null, STR_TO_DATE(:fecha_pregunta, \'%Y-%m-%d %H:%i\'), null)');
         $query->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
         $query->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
@@ -184,6 +205,15 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             //$preguntaObj = Pregunta::fromArray($row);
             $pregunta = $row;
         }
+
+        $comentarios = $producto->getComentarios();
+        $producto->setComentarios($comentarios + 1);
+        $comentarios_up = $producto->getComentarios();
+
+
+        // Actualiza el numero de comentarios del producto
+        $query = $connection->prepare("UPDATE productos SET comentarios = $comentarios_up WHERE id = $id_producto");
+        $query->execute();
 
         $returnData['pregunta'] = $pregunta;
 
@@ -400,6 +430,44 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     }
 
     try {
+        // Obtiene el id del producto
+        $sql = "SELECT id_producto FROM Preguntas WHERE id = $id_pregunta";
+        $query = $connection->prepare($sql);
+        $query->execute();
+
+        $rowCount = $query->rowCount();
+        if($rowCount === 0) {
+            $response = new Response();
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("La pregunta no existe");
+            $response->send();
+            exit();
+        }
+
+        while($row = $query->fetch(PDO::FETCH_ASSOC)){
+            $id_producto = $row['id_producto'];
+        }
+
+        // Checa que exista el producto y le aumenta 1 al numero de preguntas
+        $query = $connection->prepare("SELECT * FROM productos WHERE id = $id_producto");
+        $query->execute();
+
+        $rowCount = $query->rowCount();
+
+        if($rowCount === 0) {
+            $response = new Response();
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("El producto no existe");
+            $response->send();
+            exit();
+        }
+
+        while($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $producto = Producto::fromArray($row);
+        }
+
         $query = $connection->prepare('DELETE FROM Preguntas WHERE id = :id');
         $query->bindParam(':id', $id_pregunta, PDO::PARAM_INT);
         $query->execute();
@@ -415,6 +483,15 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
             $response->send();
             exit();
         }
+
+        $comentarios = $producto->getComentarios();
+        $producto->setComentarios($comentarios - 1);
+        $comentarios_up = $producto->getComentarios();
+
+
+        // Actualiza el numero de comentarios del producto
+        $query = $connection->prepare("UPDATE productos SET comentarios = $comentarios_up WHERE id = $id_producto");
+        $query->execute();
 
         $response = new Response();
     

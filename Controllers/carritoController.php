@@ -196,7 +196,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH') {
         // TODO: CHECAR SI EL USUARIO EXISTE
 
         // Obtine las descripciones del usuario
-        $sql = "SELECT id FROM descripciones WHERE id_usuario = $id_usuario AND pagado = 0";
+        $sql = "SELECT id, id_producto FROM descripciones WHERE id_usuario = $id_usuario AND pagado = 0";
         $query = $connection->prepare($sql);
         $query->execute();
 
@@ -204,6 +204,31 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH') {
         $descripciones = array();
         while($row = $query->fetch(PDO::FETCH_ASSOC)){
             $descripciones[] = $row['id'];
+
+            // Acutaliza el producto disponibles y vendidos
+            $id_producto = $row['id_producto'];
+
+            // Obtiene el producto
+            $queryP = $connection->prepare("SELECT * FROM productos WHERE id = $id_producto");
+            $queryP->execute();
+
+            while($row = $queryP->fetch(PDO::FETCH_ASSOC)) {
+                $producto = Producto::fromArray($row);
+            }
+
+            $disponibles = $producto->getDisponibles();
+            $producto->setDisponibles($disponibles - 1);
+            $disponibles_up = $producto->getDisponibles();
+
+            $vendidos = $producto->getVendidos();
+            $producto->setVendidos($vendidos + 1);
+            $vendidos_up = $producto->getVendidos();
+
+
+            // Actualiza el numero de disponibles y de vendidos
+            $queryV = $connection->prepare("UPDATE productos SET disponibles = $disponibles_up, vendidos = $vendidos_up WHERE id = $id_producto");
+            $queryV->execute();
+
         }
 
         // borrar descripciones producto

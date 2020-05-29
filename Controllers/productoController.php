@@ -57,7 +57,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
 
         // Obtener preguntas
-        $sqlPreguntas = "SELECT * FROM Preguntas WHERE id_producto = $producto_id AND respuesta IS NOT NULL";
+        $sqlPreguntas = "SELECT * FROM Preguntas WHERE id_producto = $producto_id";// AND respuesta IS NOT NULL";
         $queryPreguntas = $connection->prepare($sqlPreguntas);
         $queryPreguntas->execute();
 
@@ -71,12 +71,13 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $productoData = $producto->getArray();
         $productoData = [
             'titulo' => $productoData['titulo'],
+            'id_departamento' => $productoData['id_departamento'],
             'precio' => $productoData['precio'],
             'disponibles' => $productoData['disponibles'],
             'ubicacion' => $productoData['ubicacion'],
             'descripcion_corta' => $productoData['descripcion_corta'],
             'descripcion_larga' => $productoData['descripcion_larga'],
-            'caracteristicas' => $productoData['caracteristicas'],
+            'caracteristicas' => json_decode($productoData['caracteristicas']),
             'preguntas' => array_map(function($pregunta) {
                 return [
                     'pregunta' => $pregunta['pregunta'],
@@ -473,9 +474,9 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
         }
 
         if($actualiza_precio === true) {
-            $producto->setPrecio($json_data->precio);
+            $producto->setPrecio(floatval($json_data->precio));
             $up_precio = $producto->getPrecio();
-            $query->bindParam(':precio', $up_precio, PDO::PARAM_FLOAT);
+            $query->bindParam(':precio', $up_precio, PDO::PARAM_STR);
         }
 
         if($actualiza_disponibles === true) {
@@ -485,8 +486,8 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
         }
 
         if($actualiza_caracteristicas === true) {
-            $producto->setCaracteristicas($json_data->caracteristicas);
-            $up_caracteristicas = json_encode($producto->getCaracteristicas());
+            $producto->setCaracteristicas(json_encode($json_data->caracteristicas));
+            $up_caracteristicas = $producto->getCaracteristicas();
             $query->bindParam(':caracteristicas', $up_caracteristicas, PDO::PARAM_STR);
         }
 
@@ -584,6 +585,34 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     }
 
     try {
+        // Borra preguntas del producto
+        // Consulta las preguntas
+        $sql = "SELECT id FROM Preguntas WHERE id_producto = $producto_id";
+        $query = $connection->prepare($sql);
+        $query->execute();
+
+        while($row = $query->fetch(PDO::FETCH_ASSOC)){
+            $id_pregunta = $row['id'];
+
+            $queryP = $connection->prepare('DELETE FROM Preguntas WHERE id = :id');
+            $queryP->bindParam(':id', $id_pregunta, PDO::PARAM_INT);
+            $queryP->execute();
+        }
+
+        // Borra las descripciones
+        // Consulta las descropciones
+        $sql = "SELECT id FROM descripciones WHERE id_producto = $producto_id";
+        $query = $connection->prepare($sql);
+        $query->execute();
+
+        while($row = $query->fetch(PDO::FETCH_ASSOC)){
+            $id_pregunta = $row['id'];
+
+            $queryD = $connection->prepare('DELETE FROM descripciones WHERE id = :id');
+            $queryD->bindParam(':id', $id_pregunta, PDO::PARAM_INT);
+            $queryD->execute();
+        }
+
         $query = $connection->prepare('DELETE FROM productos WHERE id = :id');
         $query->bindParam(':id', $producto_id, PDO::PARAM_INT);
         $query->execute();
@@ -599,6 +628,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
             $response->send();
             exit();
         }
+
 
         $response = new Response();
     

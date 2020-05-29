@@ -67,7 +67,7 @@ class Producto {
   }
 
   public function setIdDepartamento($idDepartamento) {
-    if($idDepartamento === null || !is_numeric($idDepartamento) || !is_integer($idDepartamento) || $idDepartamento <= 0 ||  $idDepartamento >= 2137483647 || $this->_id_departamento !== null) {
+    if($idDepartamento === null || !is_numeric($idDepartamento) || !is_integer($idDepartamento) || $idDepartamento <= 0 ||  $idDepartamento >= 2137483647) {
       throw new ProductoException("Error en ID del departamento");
     }
     
@@ -118,7 +118,7 @@ class Producto {
   }
 
   public function setPrecio($precio) {
-    if($precio === null || !is_numeric($precio) || !is_float($precio) || $precio <= 0 ||  $precio >= 2137483647){
+    if($precio === null || !is_float($precio) || $precio <= 0 ||  $precio >= 2137483647){
       throw new ProductoException("Error en el precio del producto");
     }
     
@@ -151,7 +151,7 @@ class Producto {
   }
 
   public function setCaracteristicas($caracteristicas) {
-    $this->_caracteristicas = json_decode($caracteristicas);
+    $this->_caracteristicas = $caracteristicas;
   }
   public function getCaracteristicas() {
     return $this->_caracteristicas;
