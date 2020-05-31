@@ -24,5 +24,6 @@ class DB {
     }   
     return self::$db;
   }
+
 }
 ?>
