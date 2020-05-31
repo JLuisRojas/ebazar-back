@@ -8,7 +8,8 @@ class Response {
     private $_toCache = false;
     private $_responseData = array();
 
-    public function setHttpCode($httpStatusCode) {
+    //Agregué Status
+    public function setHttpStatusCode($httpStatusCode) {
         $this->_httpStatusCode = $httpStatusCode;
     }
 
@@ -24,10 +25,19 @@ class Response {
         $this->_messages[] = $message;
     }
 
+    public function setToCache($toCache) {
+        $this->_toCache = $toCache;
+    }
+
     public function send() {
         header('Content-type: application/json;charset=utf8');
+        //header('Access-Control-Allow-Origin: *');
+        //header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+        //header('Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, OPTIONS');
+        //header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
+
         if($this->_toCache == true) {
-            header('Cache-control: max-age=');
+            header('Cache-control: max-age=60');
         } else {
             header('Cache-control: no-cache, no-store');
         }

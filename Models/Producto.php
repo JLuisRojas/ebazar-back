@@ -37,6 +37,13 @@ class Producto {
     $this->setComentarios($comentarios);
   }
 
+  public static function fromArray($arr) {
+    return new Producto($arr['id'], $arr['id_usuario'], $arr['id_departamento'], $arr['titulo'], 
+                        $arr['ubicacion'], $arr['descripcion_corta'], $arr['descripcion_larga'],
+                        $arr['precio'], $arr['vendidos'], $arr['disponibles'], $arr['caracteristicas'],
+                        $arr['habilitado'], $arr['img'], $arr['comentarios']);
+  }
+
   public function setId($id) {
     if($id === null || !is_numeric($id) || !is_integer($id) || $id <= 0 ||  $id >= 2137483647 || $this->_id !== null ){
       throw new ProductoException("Error en ID del producto");
@@ -60,7 +67,7 @@ class Producto {
   }
 
   public function setIdDepartamento($idDepartamento) {
-    if($idDepartamento === null || !is_numeric($idDepartamento) || !is_integer($idDepartamento) || $idDepartamento <= 0 ||  $idDepartamento >= 2137483647 || $this->_id_departamento !== null) {
+    if($idDepartamento === null || !is_numeric($idDepartamento) || !is_integer($idDepartamento) || $idDepartamento <= 0 ||  $idDepartamento >= 2137483647) {
       throw new ProductoException("Error en ID del departamento");
     }
     
@@ -84,14 +91,14 @@ class Producto {
     if($ubicacion === null || strlen($ubicacion) > 70 || strlen($ubicacion) < 1) {
       throw new ProductoException("Error en la ubicacion del producto");
     }
-    $this->_titulo = $ubicacion;
+    $this->_ubicacion = $ubicacion;
   }
   public function getUbicacion() {
     return $this->_ubicacion;
   }
 
   public function setDescripcionCorta($descripcion_corta) {
-    if($descripcion_corta !== null && strlen($descripcion_corta) > 50) {
+    if($descripcion_corta !== null && strlen($descripcion_corta) > 300) {
       throw new ProductoException("Error en descripción corta de la producto");
     }
     $this->_descripcion_corta = $descripcion_corta;
@@ -101,7 +108,7 @@ class Producto {
   }
 
   public function setDescripcionLarga($descripcion_larga) {
-    if($descripcion_larga !== null && strlen($descripcion_larga) > 150) {
+    if($descripcion_larga !== null && strlen($descripcion_larga) > 800) {
       throw new ProductoException("Error en descripción larga del prodcuto");
     }
     $this->_descripcion_larga = $descripcion_larga;
@@ -111,7 +118,7 @@ class Producto {
   }
 
   public function setPrecio($precio) {
-    if($precio === null || !is_numeric($precio) || !is_float($precio) || $precio <= 0 ||  $precio >= 2137483647){
+    if($precio === null || !is_float($precio) || $precio <= 0 ||  $precio >= 2137483647){
       throw new ProductoException("Error en el precio del producto");
     }
     
@@ -122,7 +129,7 @@ class Producto {
   }
 
   public function setVendidos($vendidos) {
-    if($vendidos === null || !is_numeric($vendidos) || !is_integer($vendidos) || $vendidos <= 0 ||  $vendidos >= 2137483647){
+    if($vendidos === null || !is_numeric($vendidos) || !is_integer($vendidos) || $vendidos < 0 ||  $vendidos >= 2137483647){
       throw new ProductoException("Error en el numero de vendidos del producto");
     }
     
@@ -190,8 +197,8 @@ class Producto {
     $producto['disponibles'] = $this->getDisponibles();
     $producto['caracteristicas'] = $this->getCaracteristicas();
     $producto['habilitado'] = $this->getHabilitado();
-    //$producto['img'] = $this->getImg();
     $producto['comentarios'] = $this->getComentarios();
+
 
     return $producto;
   }
