@@ -98,7 +98,7 @@
                 exit();
             }
         }
-        elseif($_SERVER['REQUEST_METHOD'] === 'PATCH')
+        else if($_SERVER['REQUEST_METHOD'] === 'PATCH')
         {
             try {
                 if ($_SERVER['CONTENT_TYPE'] !== 'application/json'){
@@ -319,7 +319,7 @@
                 exit();
             }
         }
-        elseif($_SERVER['REQUEST_METHOD'] === 'DELETE') 
+        else if($_SERVER['REQUEST_METHOD'] === 'DELETE') 
         {
             try 
             {
@@ -371,15 +371,15 @@
             exit();
         }
     }
-    //GET localhost/usuarios
+    
     elseif (empty($_GET))
     {
-        //GET host/tareas
+        //GET localhost/usuarios
         if($_SERVER['REQUEST_METHOD'] === 'GET')
         {
             try 
             {
-                $query = $connection->prepare('SELECT id_usuario, num_telefono, domicilio, nombre, nombre_usuario, foto_usuario 
+                $query = $connection->prepare('SELECT id_usuario, num_telefono, domicilio, nombre, nombre_usuario, foto_usuario, 
                 email, contrasena, tipo_usuario FROM usuarios');
                 $query->execute();
     
@@ -426,7 +426,7 @@
             }
         }
          //POST
-        else if($_SERVER['REQUEST_METHOD'] === 'POST')
+        elseif($_SERVER['REQUEST_METHOD'] === 'POST')
         {
             //Verificamos que tenga el formato de JSON.
             if($_SERVER['CONTENT_TYPE'] !== 'application/json')
@@ -484,14 +484,14 @@
                 $json_data->tipo_usuario
             );
 
-            $num_telefono = trim($usuario->getTelefono());
-            $domicilio = trim($usuario->getDomicilio());
-            $nombre = trim($usuario->getNombre());
-            $nombre_usuario = trim($usuario->getNombreUsuario());
+            $num_telefono = $usuario->getTelefono();
+            $domicilio = $usuario->getDomicilio();
+            $nombre = $usuario->getNombre();
+            $nombre_usuario = $usuario->getNombreUsuario();
             $foto_usuario = $usuario->getFoto();
-            $email = trim($usuario->getEmail());
-            $contrasena = trim($usuario->getContrasena());
-            $tipo_usuario = trim($usuario->getTipoUsuario());
+            $email = $usuario->getEmail();
+            $contrasena = $usuario->getContrasena();
+            $tipo_usuario = $usuario->getTipoUsuario();
             
 
             try
@@ -549,7 +549,6 @@
                 $returnData['nombre_usuario'] = $nombre_usuario;
                 $returnData['foto_usuario'] = $foto_usuario;
                 $returnData['email'] = $email;
-                $returnData['contrasena'] = $contrasena;
                 $returnData['tipo_usuario'] = $tipo_usuario;
 
                 $response = new Response ();

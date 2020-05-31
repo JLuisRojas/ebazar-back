@@ -32,6 +32,7 @@ RewriteRule ^preguntas/id_pregunta=(.*)$ Controllers/preguntaController.php?id_p
 # Buscar
 RewriteRule ^buscar$ Controllers/buscarController.php [L]
 RewriteRule ^buscar/titulo=(.*)$ Controllers/buscarController.php?titulo=$1 [L]
+RewriteRule ^buscar/id_depa=(.*)$ Controllers/buscarController.php?id_depa=$1 [L]
 
 # Carrito
 RewriteRule ^carrito$ Controllers/carritoController.php [L]
@@ -39,4 +40,7 @@ RewriteRule ^carrito/id_usuario=(.*)$ Controllers/carritoController.php?id_usuar
 
 #Usuarios
 RewriteRule ^usuarios$ Controllers/usuariosController.php [L]
-RewriteRule ^usuarios/id_usuario=([0-9]+)$ Controllers/usuariosController.php?id_usuario=$1 [L]
+RewriteRule ^usuarios/id_usuario=(.*)$ Controllers/usuariosController.php?id_usuario=$1 [L]
+
+#Sesiones 
+RewriteRule ^sesiones$ Controllers/sesionesController.php [L]
