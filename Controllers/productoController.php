@@ -105,66 +105,91 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit();
         
         }
+        try {
+            // Consulta el producto
+            $sql = "SELECT * FROM productos WHERE id = $producto_id";
+            $query = $connection->prepare($sql);
+            $query->execute();
 
-        // Consulta el producto
-        $sql = "SELECT * FROM productos WHERE id = $producto_id";
-        $query = $connection->prepare($sql);
-        $query->execute();
+            // Si no existe producto resulta en un error
+            $rowCount = $query->rowCount();
+            if($rowCount === 0) {
+                $response = new Response();
+                $response->setHttpStatusCode(404);
+                $response->setSuccess(false);
+                $response->addMessage("No existe el producto con id: $producto_id");
+                $response->send();
+                exit();
+            }
 
-        // Si no existe producto resulta en un error
-        $rowCount = $query->rowCount();
-        if($rowCount === 0) {
+            while($row = $query->fetch(PDO::FETCH_ASSOC)){
+                $producto = Producto::fromArray($row);
+            }
+
+            // Obtener preguntas
+            $sqlPreguntas = "SELECT * FROM Preguntas WHERE id_producto = $producto_id";// AND respuesta IS NOT NULL";
+            $queryPreguntas = $connection->prepare($sqlPreguntas);
+            $queryPreguntas->execute();
+
+            $preguntas = array();
+            while($row = $queryPreguntas->fetch(PDO::FETCH_ASSOC)){
+                $pregunta = Pregunta::fromArray($row);
+                $preguntas[] = $pregunta->getArray();
+            }
+
+            // Formato de los datos del producto
+            $productoData = $producto->getArray();
+            $productoData = [
+                'titulo' => $productoData['titulo'],
+                'id_departamento' => $productoData['id_departamento'],
+                'precio' => $productoData['precio'],
+                'disponibles' => $productoData['disponibles'],
+                'ubicacion' => $productoData['ubicacion'],
+                'descripcion_corta' => $productoData['descripcion_corta'],
+                'descripcion_larga' => $productoData['descripcion_larga'],
+                'caracteristicas' => json_decode($productoData['caracteristicas']),
+                'preguntas' => array_map(function($pregunta) {
+                    return [
+                        'pregunta' => $pregunta['pregunta'],
+                        'fecha' => $pregunta['fecha_pregunta'],
+                        'respuesta' => $pregunta['respuesta']
+                    ];
+                }, $preguntas)
+            ];
+
+            // Response todo bien
+            $returnData['producto'] = $productoData;
             $response = new Response();
-            $response->setHttpStatusCode(404);
+            $response->setHttpStatusCode(200);
+            $response->setSuccess(true);
+            $response->setData($returnData);
+            $response->send();
+            exit();
+        } catch(ProductoException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
             $response->setSuccess(false);
-            $response->addMessage("No existe el producto con id: $producto_id");
+            $response->addMessage($e->getMessage());
+            $response->send();
+            exit();
+        } catch(PreguntaException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage($e->getMessage());
+            $response->send();
+            exit();
+        } catch(PDOException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Error al obtener el producto en la BD");
             $response->send();
             exit();
         }
-
-        while($row = $query->fetch(PDO::FETCH_ASSOC)){
-            $producto = Producto::fromArray($row);
-        }
-
-        // Obtener preguntas
-        $sqlPreguntas = "SELECT * FROM Preguntas WHERE id_producto = $producto_id";// AND respuesta IS NOT NULL";
-        $queryPreguntas = $connection->prepare($sqlPreguntas);
-        $queryPreguntas->execute();
-
-        $preguntas = array();
-        while($row = $queryPreguntas->fetch(PDO::FETCH_ASSOC)){
-            $pregunta = Pregunta::fromArray($row);
-            $preguntas[] = $pregunta->getArray();
-        }
-
-        // Formato de los datos del producto
-        $productoData = $producto->getArray();
-        $productoData = [
-            'titulo' => $productoData['titulo'],
-            'id_departamento' => $productoData['id_departamento'],
-            'precio' => $productoData['precio'],
-            'disponibles' => $productoData['disponibles'],
-            'ubicacion' => $productoData['ubicacion'],
-            'descripcion_corta' => $productoData['descripcion_corta'],
-            'descripcion_larga' => $productoData['descripcion_larga'],
-            'caracteristicas' => json_decode($productoData['caracteristicas']),
-            'preguntas' => array_map(function($pregunta) {
-                return [
-                    'pregunta' => $pregunta['pregunta'],
-                    'fecha' => $pregunta['fecha_pregunta'],
-                    'respuesta' => $pregunta['respuesta']
-                ];
-            }, $preguntas)
-        ];
-
-        // Response todo bien
-        $returnData['producto'] = $productoData;
-        $response = new Response();
-        $response->setHttpStatusCode(200);
-        $response->setSuccess(true);
-        $response->setData($returnData);
-        $response->send();
-        exit();
     }
     // Checa si se estan pidiendo productos del vendedor 
     elseif(array_key_exists('id_vendedor', $_GET)) {
@@ -179,48 +204,64 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         
         }
 
-        // TODO: Verificar que el usuario exista
+        try {
+            // Consulta el producto
+            $sql = "SELECT * FROM productos WHERE id_usuario = $id_vendedor";
+            $query = $connection->prepare($sql);
+            $query->execute();
 
-        // Consulta el producto
-        $sql = "SELECT * FROM productos WHERE id_usuario = $id_vendedor";
-        $query = $connection->prepare($sql);
-        $query->execute();
+            // Si no existe producto resulta en un error
+            $rowCount = $query->rowCount();
+            if($rowCount === 0) {
+                $response = new Response();
+                $response->setHttpStatusCode(404);
+                $response->setSuccess(false);
+                $response->addMessage("No existen el producto con id: $id_vendedor");
+                $response->send();
+                exit();
+            }
 
-        // Si no existe producto resulta en un error
-        $rowCount = $query->rowCount();
-        if($rowCount === 0) {
+            $productos = array();
+            while($row = $query->fetch(PDO::FETCH_ASSOC)){
+                $producto = Producto::fromArray($row);
+                $productos[] = $producto->getArray();
+            }
+
+            $productos = array_map(function($producto) {
+                return [
+                    'id' => $producto['id'],
+                    'titulo' => $producto['titulo'],
+                    'precio' => $producto['precio'],
+                    'vendidos' => $producto['vendidos'],
+                    'comentarios' => $producto['comentarios']
+                ];
+            }, $productos);
+
+            // Response todo bien
+            $returnData['productos'] = $productos;
             $response = new Response();
-            $response->setHttpStatusCode(404);
+            $response->setHttpStatusCode(200);
+            $response->setSuccess(true);
+            $response->setData($returnData);
+            $response->send();
+            exit();
+        } catch(ProductoException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
             $response->setSuccess(false);
-            $response->addMessage("No existen el producto con id: $id_vendedor");
+            $response->addMessage($e->getMessage());
+            $response->send();
+            exit();
+        } catch(PDOException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Error al obtener el producto en la BD");
             $response->send();
             exit();
         }
-
-        $productos = array();
-        while($row = $query->fetch(PDO::FETCH_ASSOC)){
-            $producto = Producto::fromArray($row);
-            $productos[] = $producto->getArray();
-        }
-
-        $productos = array_map(function($producto) {
-            return [
-                'id' => $producto['id'],
-                'titulo' => $producto['titulo'],
-                'precio' => $producto['precio'],
-                'vendidos' => $producto['vendidos'],
-                'comentarios' => $producto['comentarios']
-            ];
-        }, $productos);
-
-        // Response todo bien
-        $returnData['productos'] = $productos;
-        $response = new Response();
-        $response->setHttpStatusCode(200);
-        $response->setSuccess(true);
-        $response->setData($returnData);
-        $response->send();
-        exit();
     }
      else {
         $response = new Response();

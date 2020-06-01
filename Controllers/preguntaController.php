@@ -47,43 +47,61 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit();
         }
 
-        // Consulta las preguntas
-        $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM Preguntas WHERE id_producto = $id_producto";
-        $query = $connection->prepare($sql);
-        $query->execute();
+        try {
+            // Consulta las preguntas
+            $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM Preguntas WHERE id_producto = $id_producto";
+            $query = $connection->prepare($sql);
+            $query->execute();
 
-        $preguntas = array();
-        while($row = $query->fetch(PDO::FETCH_ASSOC)){
-            $pregunta = Pregunta::fromArray($row);
-            $preguntas[] = $pregunta->getArray();
-        }
-
-        // Formato de las preguntas
-        $preguntas = array_map(function($pregunta) {
-            $res = array();
-            $res['id'] =    $pregunta['id'];
-            $res['pregunta'] = $pregunta['pregunta']; 
-            $res['fechaPregunta'] = $pregunta['fecha_pregunta'];
-
-            if($pregunta['respuesta'] != null) {
-                $res['tieneRespuesta'] = true;
-                $res['respuesta'] = $pregunta['respuesta'];
-            } else {
-                $res['tieneRespuesta'] = false;
+            $preguntas = array();
+            while($row = $query->fetch(PDO::FETCH_ASSOC)){
+                $pregunta = Pregunta::fromArray($row);
+                $preguntas[] = $pregunta->getArray();
             }
 
-            return $res;
-            
-        }, $preguntas);
+            // Formato de las preguntas
+            $preguntas = array_map(function($pregunta) {
+                $res = array();
+                $res['id'] =    $pregunta['id'];
+                $res['pregunta'] = $pregunta['pregunta']; 
+                $res['fechaPregunta'] = $pregunta['fecha_pregunta'];
 
-        // Response todo bien
-        $returnData['preguntas'] = $preguntas;
-        $response = new Response();
-        $response->setHttpStatusCode(200);
-        $response->setSuccess(true);
-        $response->setData($returnData);
-        $response->send();
-        exit();
+                if($pregunta['respuesta'] != null) {
+                    $res['tieneRespuesta'] = true;
+                    $res['respuesta'] = $pregunta['respuesta'];
+                } else {
+                    $res['tieneRespuesta'] = false;
+                }
+
+                return $res;
+                
+            }, $preguntas);
+
+            // Response todo bien
+            $returnData['preguntas'] = $preguntas;
+            $response = new Response();
+            $response->setHttpStatusCode(200);
+            $response->setSuccess(true);
+            $response->setData($returnData);
+            $response->send();
+            exit();
+        } catch(PreguntaException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage($e->getMessage());
+            $response->send();
+            exit();
+        } catch(PDOException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Error al obtener el producto en la BD");
+            $response->send();
+            exit();
+        }
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);

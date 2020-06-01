@@ -34,55 +34,62 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             exit();
         }
 
-        // TODO: CHECAR SI EL USUARIO EXISTE
+        try {
+            // Obtine las descripciones del usuario
+            $sql = "SELECT id_producto FROM descripciones WHERE id_usuario = $id_usuario AND pagado = 0";
+            $query = $connection->prepare($sql);
+            $query->execute();
 
-        // Obtine las descripciones del usuario
-        $sql = "SELECT id_producto FROM descripciones WHERE id_usuario = $id_usuario AND pagado = 0";
-        $query = $connection->prepare($sql);
-        $query->execute();
+            $rowCount = $query->rowCount();
+            $productos = array();
+            while($row = $query->fetch(PDO::FETCH_ASSOC)){
+                // obtener producto
+                $id_producto = $row['id_producto'];
+                $sqlProducto = "SELECT * FROM productos WHERE id = $id_producto";
+                $queryProducto = $connection->prepare($sqlProducto);
+                $queryProducto->execute();
 
-        // Si no existe producto resulta en un error
-        $rowCount = $query->rowCount();
-        $productos = array();
-        while($row = $query->fetch(PDO::FETCH_ASSOC)){
-            // obtener producto
-            $id_producto = $row['id_producto'];
-            $sqlProducto = "SELECT * FROM productos WHERE id = $id_producto";
-            $queryProducto = $connection->prepare($sqlProducto);
-            $queryProducto->execute();
-
-            while($row = $queryProducto->fetch(PDO::FETCH_ASSOC)) {
-                $producto = Producto::fromArray($row);
-                $productos[] = $producto->getArray();
+                while($row = $queryProducto->fetch(PDO::FETCH_ASSOC)) {
+                    $producto = Producto::fromArray($row);
+                    $productos[] = $producto->getArray();
+                }
             }
+            $carritoData = [ 
+                'envio' => 50,
+                'productos' => array_map(function($producto) {
+                    return [
+                        'id' => $producto['id'],
+                        'titulo' => $producto['titulo'],
+                        'precio' => $producto['precio']
+                    ];
+                }, $productos)
+            ];
+
+            // Response todo bien
+            $returnData['carrito'] = $carritoData;
+            $response = new Response();
+            $response->setHttpStatusCode(200);
+            $response->setSuccess(true);
+            $response->setData($returnData);
+            $response->send();
+            exit(); 
+        } catch(PDOException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Error al obtener el producto en la BD");
+            $response->send();
+            exit();
         }
-        $carritoData = [ 
-            'envio' => 50,
-            'productos' => array_map(function($producto) {
-                return [
-                    'id' => $producto['id'],
-                    'titulo' => $producto['titulo'],
-                    'precio' => $producto['precio']
-                ];
-            }, $productos)
-        ];
 
-        // Response todo bien
-        $returnData['carrito'] = $carritoData;
         $response = new Response();
-        $response->setHttpStatusCode(200);
-        $response->setSuccess(true);
-        $response->setData($returnData);
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("El metodo no tiene campo de id");
         $response->send();
-        exit(); 
-    }
-
-    $response = new Response();
-    $response->setHttpStatusCode(400);
-    $response->setSuccess(false);
-    $response->addMessage("El metodo no tiene campo de id");
-    $response->send();
-    exit();
+        exit();    
+    } 
 } 
 // Agregar producto al carrito del usuario
 // POST server/carrito
@@ -130,16 +137,16 @@ elseif($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Descripcion
-    $descripcion = new Descripcion($json_data->id_producto, $json_data->id_usuario, $json_data->cantidad);
-
-    $id_producto = trim($descripcion->getIdProducto());
-    $id_usuario = trim($descripcion->getIdUsuario());
-    $cantidad = trim($descripcion->getCantidad());
-    $pagado = 0;
-
     try
     {
+        // Descripcion
+        $descripcion = new Descripcion($json_data->id_producto, $json_data->id_usuario, $json_data->cantidad);
+
+        $id_producto = trim($descripcion->getIdProducto());
+        $id_usuario = trim($descripcion->getIdUsuario());
+        $cantidad = trim($descripcion->getCantidad());
+        $pagado = 0;
+
         $query = $connection->prepare("INSERT INTO descripciones (id_usuario, cantidad, id_producto, pagado) VALUES ('$id_usuario', '$cantidad', '$id_producto', '$pagado')");
         $query->execute();
 
@@ -166,6 +173,14 @@ elseif($_SERVER['REQUEST_METHOD'] === 'POST') {
         $response->send();
         exit();
       
+    } catch(DescripcionException $e) {
+        error_log("Error de conexion -" . $e);
+        $response = new Response ();
+        $response->setHttpStatusCode(500);
+        $response->setSuccess(false);
+        $response->addMessage($e->getMessage());
+        $response->send();
+        exit();
     }
     catch(PDOException $e)
     {
@@ -193,60 +208,76 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH') {
             exit();
         }
 
-        // TODO: CHECAR SI EL USUARIO EXISTE
-
-        // Obtine las descripciones del usuario
-        $sql = "SELECT id, id_producto FROM descripciones WHERE id_usuario = $id_usuario AND pagado = 0";
-        $query = $connection->prepare($sql);
-        $query->execute();
-
-        $rowCount = $query->rowCount();
-        $descripciones = array();
-        while($row = $query->fetch(PDO::FETCH_ASSOC)){
-            $descripciones[] = $row['id'];
-
-            // Acutaliza el producto disponibles y vendidos
-            $id_producto = $row['id_producto'];
-
-            // Obtiene el producto
-            $queryP = $connection->prepare("SELECT * FROM productos WHERE id = $id_producto");
-            $queryP->execute();
-
-            while($row = $queryP->fetch(PDO::FETCH_ASSOC)) {
-                $producto = Producto::fromArray($row);
-            }
-
-            $disponibles = $producto->getDisponibles();
-            $producto->setDisponibles($disponibles - 1);
-            $disponibles_up = $producto->getDisponibles();
-
-            $vendidos = $producto->getVendidos();
-            $producto->setVendidos($vendidos + 1);
-            $vendidos_up = $producto->getVendidos();
-
-
-            // Actualiza el numero de disponibles y de vendidos
-            $queryV = $connection->prepare("UPDATE productos SET disponibles = $disponibles_up, vendidos = $vendidos_up WHERE id = $id_producto");
-            $queryV->execute();
-
-        }
-
-        // borrar descripciones producto
-        foreach ($descripciones as $id) {
-            $sql = "DELETE FROM descripciones WHERE id = $id";
+        try {
+            // Obtine las descripciones del usuario
+            $sql = "SELECT id, id_producto FROM descripciones WHERE id_usuario = $id_usuario AND pagado = 0";
             $query = $connection->prepare($sql);
             $query->execute();
-        }
-        
 
-        // Response todo bien
-        $returnData['descripciones'] = $descripciones;
-        $response = new Response();
-        $response->setHttpStatusCode(200);
-        $response->setSuccess(true);
-        $response->setData($returnData);
-        $response->send();
-        exit(); 
+            $rowCount = $query->rowCount();
+            $descripciones = array();
+            while($row = $query->fetch(PDO::FETCH_ASSOC)){
+                $descripciones[] = $row['id'];
+
+                // Acutaliza el producto disponibles y vendidos
+                $id_producto = $row['id_producto'];
+
+                // Obtiene el producto
+                $queryP = $connection->prepare("SELECT * FROM productos WHERE id = $id_producto");
+                $queryP->execute();
+
+                while($row = $queryP->fetch(PDO::FETCH_ASSOC)) {
+                    $producto = Producto::fromArray($row);
+                }
+
+                $disponibles = $producto->getDisponibles();
+                $producto->setDisponibles($disponibles - 1);
+                $disponibles_up = $producto->getDisponibles();
+
+                $vendidos = $producto->getVendidos();
+                $producto->setVendidos($vendidos + 1);
+                $vendidos_up = $producto->getVendidos();
+
+
+                // Actualiza el numero de disponibles y de vendidos
+                $queryV = $connection->prepare("UPDATE productos SET disponibles = $disponibles_up, vendidos = $vendidos_up WHERE id = $id_producto");
+                $queryV->execute();
+
+            }
+
+            // borrar descripciones producto
+            foreach ($descripciones as $id) {
+                $sql = "DELETE FROM descripciones WHERE id = $id";
+                $query = $connection->prepare($sql);
+                $query->execute();
+            }
+            
+
+            // Response todo bien
+            $returnData['descripciones'] = $descripciones;
+            $response = new Response();
+            $response->setHttpStatusCode(200);
+            $response->setSuccess(true);
+            $response->setData($returnData);
+            $response->send();
+            exit(); 
+        } catch(PDOException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Error al crear la descripcion");
+            $response->send();
+            exit();
+        } catch(ProductoException $e) {
+            error_log("Error de conexion -" . $e);
+            $response = new Response ();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage($e->getMessage());
+            $response->send();
+            exit();
+        }
     }
 
     $response = new Response();

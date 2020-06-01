@@ -80,7 +80,7 @@ if(array_key_exists("id_depa", $_GET))
                 $response->send();
                 exit();
         }
-        catch(UsuarioException $e)
+        catch(ProductoException $e)
         {
             $response = new Response();
             $response->setHttpStatusCode(500);
@@ -138,51 +138,72 @@ else if($_SERVER['REQUEST_METHOD'] === 'GET') {
             $pag = $_GET['max'];
         }*/
 
-        // Consulta de los productos
-        $sql = "SELECT * FROM productos WHERE MATCH(titulo) AGAINST('$titulo')";
-        $query = $connection->prepare($sql);
-        $query->execute();
+        try {
+            // Consulta de los productos
+            $sql = "SELECT * FROM productos WHERE MATCH(titulo) AGAINST('$titulo')";
+            $query = $connection->prepare($sql);
+            $query->execute();
 
-        $totalResultados = $query->rowCount();
-        $totalPag = ceil($totalResultados / $max); 
-        if($pag * $max > $totalResultados) {
-            $resultados = $totalResultados - ($pag - 1) * $max;
-        } else {
-            $resultados = $max;
+            $totalResultados = $query->rowCount();
+            $totalPag = ceil($totalResultados / $max); 
+            if($pag * $max > $totalResultados) {
+                $resultados = $totalResultados - ($pag - 1) * $max;
+            } else {
+                $resultados = $max;
+            }
+
+            $productos = array();
+            while($row = $query->fetch(PDO::FETCH_ASSOC)){
+                $producto = Producto::fromArray($row);
+                $productos[] = $producto->getArray();
+            }
+
+            // Formato de los datos del producto
+            $busquedaData = [
+                'pagina' => $pag,
+                'totalPaginas' => $totalPag,
+                'totalResultados' => $totalResultados,
+                'resultados' => $resultados,
+                'consulta' => $titulo,
+                'productos' => array_map(function($producto) {
+                    return [
+                        'id' => $producto['id'],
+                        'titulo' => $producto['titulo'],
+                        'precio' => $producto['precio'],
+                        'disponibles' => $producto['disponibles'],
+                        'ubicacion' => $producto['ubicacion']
+                    ];
+                }, $productos)
+            ];
+
+            // Response todo bien
+            $returnData['busqueda'] = $busquedaData;
+            $response = new Response();
+            $response->setHttpStatusCode(200);
+            $response->setSuccess(true);
+            $response->setData($returnData);
+            $response->send();
+            exit(); 
+        } catch(ProductoException $e)
+        {
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage($e->getMessage());
+            $response->send();
+            exit();
         }
+        catch(PDOException $e) 
+        {
+            error_log("Error en BD - " . $e);
 
-        $productos = array();
-        while($row = $query->fetch(PDO::FETCH_ASSOC)){
-            $producto = Producto::fromArray($row);
-            $productos[] = $producto->getArray();
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Error en consulta de productos");
+            $response->send();
+            exit();
         }
-
-        // Formato de los datos del producto
-        $busquedaData = [
-            'pagina' => $pag,
-            'totalPaginas' => $totalPag,
-            'totalResultados' => $totalResultados,
-            'resultados' => $resultados,
-            'consulta' => $titulo,
-            'productos' => array_map(function($producto) {
-                return [
-                    'id' => $producto['id'],
-                    'titulo' => $producto['titulo'],
-                    'precio' => $producto['precio'],
-                    'disponibles' => $producto['disponibles'],
-                    'ubicacion' => $producto['ubicacion']
-                ];
-            }, $productos)
-        ];
-
-        // Response todo bien
-        $returnData['busqueda'] = $busquedaData;
-        $response = new Response();
-        $response->setHttpStatusCode(200);
-        $response->setSuccess(true);
-        $response->setData($returnData);
-        $response->send();
-        exit(); 
 
     } else {
         $response = new Response();
