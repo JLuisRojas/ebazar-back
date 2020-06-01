@@ -42,6 +42,9 @@ class Pregunta {
     }
 
     public function setId($id) {
+        if($id === null || !is_numeric($id) || !is_integer($id) || $id <= 0 ||  $id >= 2137483647){
+            throw new PreguntaException("Error en el id de la preguta");
+        }
         $this->_id = $id;
     }
     public function getId() {
@@ -49,6 +52,9 @@ class Pregunta {
     }
 
     public function setIdProducto($id_producto) {
+        if($id_producto === null || !is_numeric($id_producto) || !is_integer($id_producto) || $id_producto <= 0 ||  $id_producto >= 2137483647){
+            throw new PreguntaException("Error en el id del producto");
+        }
         $this->_id_producto = $id_producto;
     }
     public function getIdProducto() {
@@ -56,6 +62,9 @@ class Pregunta {
     }
 
     public function setIdUsuario($id_usuario) {
+        if($id_usuario === null || !is_numeric($id_usuario) || !is_integer($id_usuario) || $id_usuario <= 0 ||  $id_usuario >= 2137483647){
+            throw new PreguntaException("Error en el id del usuario");
+        }
         $this->_id_usuario = $id_usuario;
     }
 
@@ -64,6 +73,9 @@ class Pregunta {
     }
 
     public function setPregunta($pregunta) {
+        if($pregunta === null || strlen($pregunta) > 300) {
+            throw new PreguntaException("Error en la pregunta");
+        }
         $this->_pregunta = $pregunta;
     }
 
@@ -72,6 +84,9 @@ class Pregunta {
     }
 
     public function setRespuesta($respuesta) {
+        if($respuesta !== null && strlen($respuesta) > 300) {
+            throw new PreguntaException("Error en la respuesta de la pregunta");
+        }
         $this->_respuesta = $respuesta;
     }
 
@@ -80,6 +95,9 @@ class Pregunta {
     }
 
     public function setFechaPregunta($fecha_pregunta) {
+        if ($fecha_pregunta === null || date_format(date_create_from_format('Y-m-d H:i', $fecha_pregunta), 'Y-m-d H:i') !== $fecha_pregunta) {
+            throw new PreguntaException("Error en la fecha en la cual fue realizada la pregunta");
+        }
         $this->_fecha_pregunta = $fecha_pregunta;
     }
 
@@ -88,6 +106,9 @@ class Pregunta {
     }
 
     public function setFechaRespuesta($fecha_respuesta) {
+        if ($fecha_pregunta !== null && date_format(date_create_from_format('Y-m-d H:i', $fecha_pregunta), 'Y-m-d H:i') !== $fecha_pregunta) {
+            throw new PreguntaException("Error en la fecha en la cual fue realizada la pregunta");
+        }
         $this->_fecha_respuesta = $fecha_respuesta;
     }
 
