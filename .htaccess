@@ -6,6 +6,9 @@ Header always set Access-Control-Allow-Headers "Content-type, Authorization"
 
 RewriteEngine On
 
+#Autorización del token
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # Cosas raras
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
@@ -18,13 +21,13 @@ RewriteCond %(REQUEST_FILENAME) !-f
 
 #Productos
 RewriteRule ^productos$ Controllers/productoController.php [L]
-<<<<<<< HEAD
+
 RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/tareasController.php?categoria_id=$1 [L]
 RewriteRule ^productos/producto_id=(.*)$ Controllers/tareasController.php?categoria_id=$1 [L]
 
 #Usuarios
 RewriteRule ^usuarios$ Controllers/usuariosController.php
-=======
+
 RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/productoController.php?categoria_id=$1 [L]
 RewriteRule ^productos/producto_id=(.*)$ Controllers/productoController.php?categoria_id=$1 [L]
 RewriteRule ^productos/id_vendedor=(.*)$ Controllers/productoController.php?id_vendedor=$1 [L]
@@ -51,4 +54,3 @@ RewriteRule ^usuarios/id_usuario=(.*)$ Controllers/usuariosController.php?id_usu
 
 #Sesiones 
 RewriteRule ^sesiones$ Controllers/sesionesController.php [L]
->>>>>>> e8b9f5ec562604198d4c16de4cf20a840e7c77a0

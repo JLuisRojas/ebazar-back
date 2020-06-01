@@ -111,7 +111,7 @@ if(array_key_exists("id_depa", $_GET))
         exit();
     }
 
-}/*
+}
 // GET server/buscar?titulo=Fulano
 else if($_SERVER['REQUEST_METHOD'] === 'GET') {
     if(array_key_exists("titulo", $_GET)) {
@@ -138,7 +138,6 @@ else if($_SERVER['REQUEST_METHOD'] === 'GET') {
             $pag = $_GET['max'];
         }*/
 
-        /*
         // Consulta de los productos
         $sql = "SELECT * FROM productos WHERE MATCH(titulo) AGAINST('$titulo')";
         $query = $connection->prepare($sql);
@@ -193,5 +192,5 @@ else if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response->send();
         exit();
     }
-}*/
+}
 ?>
