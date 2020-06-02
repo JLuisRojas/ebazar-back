@@ -49,7 +49,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         try {
             // Consulta las preguntas
-            $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM Preguntas WHERE id_producto = $id_producto";
+            $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM preguntas WHERE id_producto = $id_producto";
             $query = $connection->prepare($sql);
             $query->execute();
 
@@ -184,7 +184,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             $producto = Producto::fromArray($row);
         }
 
-        $query = $connection->prepare('INSERT INTO Preguntas (id_producto, id_usuario, pregunta, respuesta, fecha_pregunta, fecha_respuesta) VALUES (:id_producto, :id_usuario, :pregunta, null, STR_TO_DATE(:fecha_pregunta, \'%Y-%m-%d %H:%i\'), null)');
+        $query = $connection->prepare('INSERT INTO preguntas (id_producto, id_usuario, pregunta, respuesta, fecha_pregunta, fecha_respuesta) VALUES (:id_producto, :id_usuario, :pregunta, null, STR_TO_DATE(:fecha_pregunta, \'%Y-%m-%d %H:%i\'), null)');
         $query->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
         $query->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
         $query->bindParam(':pregunta', $pregunta, PDO::PARAM_STR);
@@ -204,7 +204,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         $ultimo_ID = $connection->lastInsertId();
 
-        $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d %H:%i') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM Preguntas WHERE id = $ultimo_ID";
+        $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d %H:%i') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM preguntas WHERE id = $ultimo_ID";
         $query = $connection->prepare($sql);
         $query->execute();
 
@@ -329,7 +329,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
         $campos_query = rtrim($campos_query, ", ");
 
 
-        $query = $connection->prepare("SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d %H:%i') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM Preguntas WHERE id = :id");
+        $query = $connection->prepare("SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d %H:%i') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM preguntas WHERE id = :id");
         $query->bindParam(':id', $id_pregunta, PDO::PARAM_INT);
         $query->execute();
 
@@ -348,7 +348,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
             $pregunta = Pregunta::fromArray($row);
         }
 
-        $cadena_query = 'UPDATE Preguntas SET respuesta = :respuesta, fecha_respuesta = STR_TO_DATE(:fecha_respuesta, \'%Y-%m-%d %H:%i\') WHERE id = :id';
+        $cadena_query = 'UPDATE preguntas SET respuesta = :respuesta, fecha_respuesta = STR_TO_DATE(:fecha_respuesta, \'%Y-%m-%d %H:%i\') WHERE id = :id';
         $query = $connection->prepare($cadena_query);
 
         $pregunta->setRespuesta($respuesta);
@@ -374,7 +374,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
             exit();
         }
 
-        $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d %H:%i') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM Preguntas WHERE id = $id_pregunta";
+        $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d %H:%i') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM preguntas WHERE id = $id_pregunta";
         $query = $connection->prepare($sql);
         $query->execute();
 
@@ -449,7 +449,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
 
     try {
         // Obtiene el id del producto
-        $sql = "SELECT id_producto FROM Preguntas WHERE id = $id_pregunta";
+        $sql = "SELECT id_producto FROM preguntas WHERE id = $id_pregunta";
         $query = $connection->prepare($sql);
         $query->execute();
 
@@ -486,7 +486,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
             $producto = Producto::fromArray($row);
         }
 
-        $query = $connection->prepare('DELETE FROM Preguntas WHERE id = :id');
+        $query = $connection->prepare('DELETE FROM preguntas WHERE id = :id');
         $query->bindParam(':id', $id_pregunta, PDO::PARAM_INT);
         $query->execute();
 

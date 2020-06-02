@@ -127,7 +127,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
 
             // Obtener preguntas
-            $sqlPreguntas = "SELECT * FROM Preguntas WHERE id_producto = $producto_id";// AND respuesta IS NOT NULL";
+            $sqlPreguntas = "SELECT * FROM preguntas WHERE id_producto = $producto_id";// AND respuesta IS NOT NULL";
             $queryPreguntas = $connection->prepare($sqlPreguntas);
             $queryPreguntas->execute();
 
@@ -698,14 +698,14 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     try {
         // Borra preguntas del producto
         // Consulta las preguntas
-        $sql = "SELECT id FROM Preguntas WHERE id_producto = $producto_id";
+        $sql = "SELECT id FROM preguntas WHERE id_producto = $producto_id";
         $query = $connection->prepare($sql);
         $query->execute();
 
         while($row = $query->fetch(PDO::FETCH_ASSOC)){
             $id_pregunta = $row['id'];
 
-            $queryP = $connection->prepare('DELETE FROM Preguntas WHERE id = :id');
+            $queryP = $connection->prepare('DELETE FROM preguntas WHERE id = :id');
             $queryP->bindParam(':id', $id_pregunta, PDO::PARAM_INT);
             $queryP->execute();
         }
