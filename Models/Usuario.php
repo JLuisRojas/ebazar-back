@@ -119,7 +119,7 @@ class Usuario{
 
     public function setContrasena($contrasena)
     {
-        if ($contrasena === null || strlen($contrasena) > 50 || strlen($contrasena) < 1)
+        if ($contrasena === null || strlen($contrasena) > 255 || strlen($contrasena) < 1)
         {
             throw new UsuarioException("Error de contraseña en usuario");
         }
