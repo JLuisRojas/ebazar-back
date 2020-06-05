@@ -32,13 +32,13 @@ if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATIO
     exit();
 }
 
-/*$accesstoken = $_SERVER['HTTP_AUTHORIZATION']; 
+$accesstoken = $_SERVER['HTTP_AUTHORIZATION']; 
 
 try
 {
     //Se verifica que el token de acceso sea válido.
-    $query = $connection->prepare('SELECT id_usuario, caducidad_token_acceso, activo FROM sesiones, usuarios WHERE sesiones.id_usuario = usuarios.id_usuario
-    AND token_acceso = :token_acceso');
+    $query = $connection->prepare('SELECT id_user, caducidad_token_acceso, activo FROM sesiones, usuarios 
+    WHERE sesiones.id_user = usuarios.id_usuario AND token_acceso = :token_acceso');
     $query->bindParam(':token_acceso', $accesstoken, PDO::PARAM_STR);
     $query->execute();
 
@@ -56,7 +56,7 @@ try
 
     $row = $query->fetch(PDO::FETCH_ASSOC);
 
-    $consulta_idUsuario = $row['id_usuario'];
+    $consulta_idUsuario = $row['id_user'];
     $consulta_cadTokenAcceso = $row['caducidad_token_acceso'];
     $consulta_activo = $row['activo'];
 
@@ -90,7 +90,7 @@ catch (PDOException $e)
     $response->addMessage("Error al autenticar usuario");
     $response->send();
     exit();
-}*/
+}
 
 // GET server/producto?id=#
 if($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -309,15 +309,15 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
     // disponibles: number
     // caracteristicas : JSON
 
-    // Si el JSON no contiene ninguna de las cosas necesarias, es porque hay un error y no viene toda la información.
-    if(!isset($json_data->id_usuario) || !isset($json_data->id_departamento) || !isset($json_data->titulo) ||
+    // Si el JSON no contiene ninguna de las cosas necesarias, es porque hay un error y no viene toda la información. !isset($json_data->id_usuario) ||
+    if(!isset($json_data->id_departamento) || !isset($json_data->titulo) ||
        !isset($json_data->ubicacion) || !isset($json_data->descripcion_corta) || !isset($json_data->descripcion_larga) ||
        !isset($json_data->precio) || !isset($json_data->disponibles) || !isset($json_data->caracteristicas))
     {
         $response = new Response ();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        (!isset($json_data->id_usuario) ? $response->addMessage("El id de usuario es obligatorio") : false);
+        //(!isset($json_data->id_usuario) ? $response->addMessage("El id de usuario es obligatorio") : false);
         (!isset($json_data->id_departamento) ? $response->addMessage("El id de departamento es obligatorio") : false);
         (!isset($json_data->titulo) ? $response->addMessage("El titulo es obligatorio") : false);
         (!isset($json_data->ubicacion) ? $response->addMessage("La ubicacion es obligatoria") : false);
@@ -329,7 +329,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response->send();
         exit();
     }
-    $id_usuario = trim($json_data->id_usuario);
+    //$id_usuario = trim($json_data->id_usuario);
     $id_departamento = trim($json_data->id_departamento);
     $titulo = trim($json_data->titulo);
     $ubicacion = trim($json_data->ubicacion);
@@ -349,7 +349,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $query = $connection->prepare("INSERT INTO productos 
             (id_usuario, id_departamento, titulo, ubicacion, descripcion_corta, descripcion_larga,
             precio, vendidos, disponibles, caracteristicas, habilitado, img, comentarios) 
-            VALUES ('$id_usuario', '$id_departamento', '$titulo', '$ubicacion', '$descripcion_corta',
+            VALUES ('$consulta_idUsuario', '$id_departamento', '$titulo', '$ubicacion', '$descripcion_corta',
             '$descripcion_larga', '$precio', '$vendidos', '$disponibles', '$caracteristicas',
             '$habilitado', '$img', '$comentarios')");
         $query->execute();
