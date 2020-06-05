@@ -127,7 +127,7 @@ else if($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         // Parametros opcionales
         $pag = 1;           // Pagina actual
-        $max = 10;           // Maximo numero de elementos por pagina
+        $max = 2;           // Maximo numero de elementos por pagina
 
         if(array_key_exists("pag", $_GET)) {
             $pag = $_GET['pag'];
@@ -152,10 +152,20 @@ else if($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $resultados = $max;
             }
 
+            $pagG = $pag - 1;
+            $inicio = $pagG * $max;
+
+            $numProd = 0;
+            $contador = 1;
             $productos = array();
             while($row = $query->fetch(PDO::FETCH_ASSOC)){
-                $producto = Producto::fromArray($row);
-                $productos[] = $producto->getArray();
+                if($numProd < $max && $contador > $inicio) {
+                    $numProd = $numProd + 1;
+                    $producto = Producto::fromArray($row);
+                    $productos[] = $producto->getArray();
+                }
+
+                $contador = $contador + 1;
             }
 
             // Formato de los datos del producto
@@ -163,7 +173,7 @@ else if($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'pagina' => $pag,
                 'totalPaginas' => $totalPag,
                 'totalResultados' => $totalResultados,
-                'resultados' => $resultados,
+                'resultados' => $pag * $max,
                 'consulta' => $titulo,
                 'productos' => array_map(function($producto) {
                     return [
