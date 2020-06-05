@@ -327,8 +327,6 @@
             $consulta_contrasena = $row['contrasena'];
             $consulta_activo = $row['activo'];
 
-            echo $row['contrasena'];
-
             //Confirmamos que el usuario está activo.
             if ($consulta_activo !== 'SI') 
             {
@@ -355,7 +353,7 @@
             $token_acceso = base64_encode(bin2hex(openssl_random_pseudo_bytes(24)) . time());
             $token_actualizacion = base64_encode(bin2hex(openssl_random_pseudo_bytes(24)) . time());
             
-            $caducidad_tacceso_s = 600;
+            $caducidad_tacceso_s = 1800;
             $caducidad_tactualizacion_s = 129600;   
         }
         catch(PDOException $e)

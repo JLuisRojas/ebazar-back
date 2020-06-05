@@ -54,3 +54,5 @@ RewriteRule ^usuarios/id_usuario=(.*)$ Controllers/usuariosController.php?id_usu
 
 #Sesiones 
 RewriteRule ^sesiones$ Controllers/sesionesController.php [L]
+RewriteRule ^sesiones/id_sesion=(.*)$ Controllers/sesionesController.php?id_sesion=$1 [L]
+
