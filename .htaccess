@@ -19,18 +19,16 @@ RewriteCond %(REQUEST_FILENAME) !-f
 #Categorias 
 #RewriteRule ^categorias$ Controllers/categoriasController.php [L]
 
-#Productos
-RewriteRule ^productos$ Controllers/productoController.php [L]
-
-RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/tareasController.php?categoria_id=$1 [L]
-RewriteRule ^productos/producto_id=(.*)$ Controllers/tareasController.php?categoria_id=$1 [L]
-
-#Usuarios
-RewriteRule ^usuarios$ Controllers/usuariosController.php
-
+#Producto
 RewriteRule ^productos?producto_id=([0-9]+)$ Controllers/productoController.php?categoria_id=$1 [L]
 RewriteRule ^productos/producto_id=(.*)$ Controllers/productoController.php?categoria_id=$1 [L]
 RewriteRule ^productos/id_vendedor=(.*)$ Controllers/productoController.php?id_vendedor=$1 [L]
+
+#Productos
+RewriteRule ^productos$ Controllers/productosController.php [L]
+
+#Usuarios
+RewriteRule ^usuarios$ Controllers/usuariosController.php
 
 #Preguntas
 RewriteRule ^preguntas$ Controllers/preguntaController.php [L]
@@ -56,3 +54,5 @@ RewriteRule ^usuarios/id_usuario=(.*)$ Controllers/usuariosController.php?id_usu
 RewriteRule ^sesiones$ Controllers/sesionesController.php [L]
 RewriteRule ^sesiones/id_sesion=(.*)$ Controllers/sesionesController.php?id_sesion=$1 [L]
 
+#Departamentos
+RewriteRule ^departamentos$ Controllers/departamentosController.php [L]

@@ -23,7 +23,7 @@ catch(PDOException $e){
 }
 
 //Verificación token
-if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATION']) < 1) {
+/*if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATION']) < 1) {
     $response = new Response();
     $response->setHttpStatusCode(401);
     $response->setSuccess(false);
@@ -90,7 +90,7 @@ catch (PDOException $e)
     $response->addMessage("Error al autenticar usuario");
     $response->send();
     exit();
-}
+}*/
 
 // GET server/producto?id=#
 if($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -762,7 +762,8 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     }
 
 
-}  else {
+} 
+else {
     $response = new Response();
     $response->setHttpStatusCode(405);
     $response->setSuccess(false);
@@ -770,5 +771,4 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     $response->send();
     exit();
 }
-
 ?>
