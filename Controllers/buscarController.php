@@ -67,8 +67,8 @@ try
         $response->send();
         exit();
     }
-    if (strtotime($consulta_cadTokenAcceso) + 6001 + 1200 < time()) 
-    //if (strtotime($consulta_cadTokenAcceso) < time()) 
+    //if (strtotime($consulta_cadTokenAcceso) + 6001 + 1200 < time()) 
+    if (strtotime($consulta_cadTokenAcceso) < time()) 
     {
         $response = new Response();
         $response->setHttpStatusCode(401);
