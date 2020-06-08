@@ -26,6 +26,8 @@ RewriteRule ^productos/id_vendedor=(.*)$ Controllers/productoController.php?id_v
 
 #Productos
 RewriteRule ^productos$ Controllers/productosController.php [L]
+RewriteRule ^productos/id_depa=(.*)$ Controllers/productosController.php?id_depa=$1 [L]
+
 
 #Usuarios
 RewriteRule ^usuarios$ Controllers/usuariosController.php

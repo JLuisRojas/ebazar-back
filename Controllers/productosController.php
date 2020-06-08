@@ -92,6 +92,94 @@ if(empty($_GET))
         exit();
     }
 }
+elseif(array_key_exists('id_depa', $_GET))
+{
+    $id_depa = $_GET['id_depa'];
+
+    if ($id_depa === '' || !is_numeric($id_depa)) 
+    {
+        $response = new Response();
+
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        ($id_depa === '' ? $response->addMessage("Id del departamento no puede estar vacío") : false);
+        (!is_numeric($id_depa) ? $response->addMessage("Id del departamento debe ser numérico") : false);
+        $response->send();
+        exit();
+    }
+
+    if($_SERVER['REQUEST_METHOD'] !== 'GET') 
+    {
+        $response = new Response();
+        $response->setHttpStatusCode(405);
+        $response->setSuccess(false);
+        $response->addMessage("Método no permitido");
+        $response->send();
+        exit();
+    }
+
+    try 
+    {
+        $sql = 'SELECT id, id_usuario, id_departamento, titulo, ubicacion, descripcion_corta, descripcion_larga, precio, vendidos, disponibles,
+        caracteristicas, habilitado, img, comentarios FROM productos WHERE id_departamento = :id_depa';
+        $query = $connection->prepare($sql);
+        $query->bindParam(':id_depa', $id_depa, PDO::PARAM_INT);
+        $query->execute();
+
+        $rowCount = $query->rowCount();
+        
+        if($rowCount === 0) 
+        {
+            $response = new Response();
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("No se encontraron productos en este departamento");
+            $response->send();
+            exit();
+        }
+
+        $productos = array();
+
+        while($row = $query->fetch(PDO::FETCH_ASSOC))
+        {
+            $producto = new Producto($row['id'], $row['id_usuario'], $row['id_departamento'],$row['titulo'], $row['ubicacion'], 
+            $row['descripcion_corta'], $row['descripcion_larga'], $row['precio'], $row['vendidos'], $row['disponibles'],
+            $row['caracteristicas'], $row['habilitado'], $row['img'], $row['comentarios']);
+
+            $productos[] = $producto->getArray();
+        }
+
+        $returnData = array();
+        $returnData['total_registros'] = $rowCount;
+        $returnData['productos'] = $productos;
+
+        $response = new Response();
+        $response->setHttpStatusCode(200);
+        $response->setSuccess(true);
+        $response->setToCache(true);
+        $response->setData($returnData);
+        $response->send();
+        exit();
+    }
+    catch(ProductoException $e){
+        $response = new Response();
+        $response->setHttpStatusCode(500);
+        $response->setSuccess(false);
+        $response->addMessage($e->getMessage());
+        $response->send();
+        exit();
+    }
+    catch(PDOException $e) {
+        error_log("Error en BD - " . $e);
+
+        $response = new Response();
+        $response->setHttpStatusCode(500);
+        $response->setSuccess(false);
+        $response->addMessage("Error en consulta de productos");
+        $response->send();
+        exit();
+    }
+}
 
 
 
