@@ -131,7 +131,7 @@
     
                 $query = $connection->prepare('SELECT sesiones.id AS id_sesion, sesiones.id_user, activo, token_acceso, 
                 token_actualizacion, caducidad_token_acceso, caducidad_token_actualizacion FROM sesiones, 
-                usuarios WHERE sesiones.id_user = usuarios.id_usuario AND sesiones.id = :id_sesion 
+                usuarios WHERE sesiones.id = :id_sesion 
                 AND sesiones.token_acceso = :token_acceso AND token_actualizacion = :token_actualizacion');
                 $query->bindParam(':id_sesion', $id_sesion, PDO::PARAM_INT);
                 $query->bindParam(':token_acceso', $accesstoken, PDO::PARAM_STR);
@@ -213,6 +213,7 @@
                 }
 
                 $returnData = array();
+                $returnData['id_usuario'] = $consulta_id_usuario;
                 $returnData['id_sesion'] = $id_sesion;
                 $returnData['token_acceso'] = $token_acceso;
                 $returnData['caducidad_token_acceso'] = $caducidad_tacceso_s;
@@ -387,6 +388,7 @@
             $connection->commit();
     
             $returnData = array();
+            $returnData['id_usuario'] = $consulta_id_usuario;
             $returnData['id_sesion'] = intval($ultimoID);
             $returnData['token_acceso'] = $token_acceso;
             $returnData['caducidad_token_acceso'] = $caducidad_tacceso_s;

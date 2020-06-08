@@ -173,7 +173,7 @@ else if($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'pagina' => $pag,
                 'totalPaginas' => $totalPag,
                 'totalResultados' => $totalResultados,
-                'resultados' => $pag * $max,
+                'resultados' => count($productos),
                 'consulta' => $titulo,
                 'productos' => array_map(function($producto) {
                     return [
