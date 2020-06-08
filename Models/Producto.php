@@ -198,6 +198,7 @@ class Producto {
     $producto['caracteristicas'] = $this->getCaracteristicas();
     $producto['habilitado'] = $this->getHabilitado();
     $producto['comentarios'] = $this->getComentarios();
+    $producto['img'] = $this->getImg();
 
 
     return $producto;

@@ -131,7 +131,8 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
                     return [
                         'id' => $producto['id'],
                         'titulo' => $producto['titulo'],
-                        'precio' => $producto['precio']
+                        'precio' => $producto['precio'],
+                        'img' => $producto['img']
                     ];
                 }, $productos)
             ];

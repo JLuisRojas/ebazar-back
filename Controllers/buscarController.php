@@ -251,7 +251,8 @@ else if($_SERVER['REQUEST_METHOD'] === 'GET') {
                         'titulo' => $producto['titulo'],
                         'precio' => $producto['precio'],
                         'disponibles' => $producto['disponibles'],
-                        'ubicacion' => $producto['ubicacion']
+                        'ubicacion' => $producto['ubicacion'],
+                        'img' =>$producto['img']
                     ];
                 }, $productos)
             ];

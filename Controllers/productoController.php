@@ -144,6 +144,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'descripcion_corta' => $productoData['descripcion_corta'],
                 'descripcion_larga' => $productoData['descripcion_larga'],
                 'caracteristicas' => json_decode($productoData['caracteristicas']),
+                'img' => $productoData['img'],
                 'preguntas' => array_map(function($pregunta) {
                     return [
                         'pregunta' => $pregunta['pregunta'],
@@ -229,7 +230,8 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'titulo' => $producto['titulo'],
                     'precio' => $producto['precio'],
                     'vendidos' => $producto['vendidos'],
-                    'comentarios' => $producto['comentarios']
+                    'comentarios' => $producto['comentarios'],
+                    'img' => $producto['img']
                 ];
             }, $productos);
 
@@ -304,6 +306,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
     // precio: number
     // disponibles: number
     // caracteristicas : JSON
+    // img: string
 
     // Si el JSON no contiene ninguna de las cosas necesarias, es porque hay un error y no viene toda la información. !isset($json_data->id_usuario) ||
     if(!isset($json_data->id_departamento) || !isset($json_data->titulo) ||
@@ -322,6 +325,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         (!isset($json_data->precio) ? $response->addMessage("El precio es obligatorio") : false);
         (!isset($json_data->disponibles) ? $response->addMessage("El numero de disponibles es obligatorio") : false);
         (!isset($json_data->caracteristicas) ? $response->addMessage("Las caracteristicas son obligatorias") : false);
+        (!isset($json_data->img) ? $response->addMessage("El campo imagen es obligatorio") : false);
         $response->send();
         exit();
     }
@@ -336,7 +340,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
     $disponibles = trim($json_data->disponibles);
     $caracteristicas = trim(json_encode($json_data->caracteristicas));
     $habilitado = 1;
-    $img = null;
+    $img = trim($json_data->img);
     $comentarios = 0;
 
     // Crea el producto en la BD
@@ -355,7 +359,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             $response = new Response ();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
-            $response->addMessage("Error al crear descripcion");
+            $response->addMessage("Error al crear el producto");
             $response->send();
             exit();
         }
@@ -449,6 +453,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
          * disponibles: int
          * caracteristicas: JSON
          * habilitado: boolean
+         * img: string
          */
 
         $actualiza_id_departamento = false;
@@ -460,6 +465,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
         $actualiza_disponibles = false;
         $actualiza_caracteristicas = false;
         $actualiza_habilitado = false;
+        $actualiza_img = false;
 
 
         $campos_query = "";
@@ -509,6 +515,11 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
             $campos_query .= "habilitado = :habilitado, ";
         }
 
+        if (isset($json_data->img)) {
+            $actualiza_img = true;
+            $campos_query .= "img = :img, ";
+        }
+
         $campos_query = rtrim($campos_query, ", ");
 
         if ($actualiza_id_departamento === false 
@@ -519,7 +530,8 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
         && $actualiza_precio === false 
         && $actualiza_disponibles === false 
         && $actualiza_caracteristicas === false 
-        && $actualiza_habilitado === false) {
+        && $actualiza_habilitado === false
+        && $actualiza_img === false) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -602,6 +614,12 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
             $producto->setHabilitado($json_data->habilitado);
             $up_habilitado = $producto->getHabilitado();
             $query->bindParam(':habilitado', $up_habilitado, PDO::PARAM_BOOL);
+        }
+
+        if($actualiza_img === true) {
+            $producto->setImg($json_data->img);
+            $up_img = $producto->getImg();
+            $query->bindParam(':img', $up_img, PDO::PARAM_STR);
         }
 
         $query->bindParam(':id', $producto_id, PDO::PARAM_INT);
