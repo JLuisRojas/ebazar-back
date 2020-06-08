@@ -390,6 +390,7 @@
             $returnData = array();
             $returnData['id_usuario'] = $consulta_id_usuario;
             $returnData['id_sesion'] = intval($ultimoID);
+            $returnData['id_user'] = $consulta_id_usuario;
             $returnData['token_acceso'] = $token_acceso;
             $returnData['caducidad_token_acceso'] = $caducidad_tacceso_s;
             $returnData['token_actualizacion'] = $token_actualizacion;
