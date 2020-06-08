@@ -1,8 +1,4 @@
 <?php
-// Controlador del producto
-// el cual se encarga de las siguientes rutas
-// FALTA TRY DE CREAR PRODUCTO Y RESPUESTA
-
 require_once('../Models/Producto.php');
 require_once('../Models/Pregunta.php');
 require_once('../Models/DB.php');
@@ -23,7 +19,7 @@ catch(PDOException $e){
 }
 
 //Verificación token
-/*if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATION']) < 1) {
+if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATION']) < 1) {
     $response = new Response();
     $response->setHttpStatusCode(401);
     $response->setSuccess(false);
@@ -69,8 +65,8 @@ try
         $response->send();
         exit();
     }
-    //if (strtotime($consulta_cadTokenAcceso) + 6001 + 1200 < time()) 
-    if (strtotime($consulta_cadTokenAcceso) < time()) 
+    if (strtotime($consulta_cadTokenAcceso) + 6001 + 1200 < time()) 
+    //if (strtotime($consulta_cadTokenAcceso) < time()) 
     {
         $response = new Response();
         $response->setHttpStatusCode(401);
@@ -90,7 +86,7 @@ catch (PDOException $e)
     $response->addMessage("Error al autenticar usuario");
     $response->send();
     exit();
-}*/
+}
 
 // GET server/producto?id=#
 if($_SERVER['REQUEST_METHOD'] === 'GET') {
