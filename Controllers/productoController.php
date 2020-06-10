@@ -135,6 +135,16 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $preguntas[] = $pregunta->getArray();
             }
 
+            // Obtener imagenes del producto
+            $sqlImagenes = "SELECT id_imagen FROM imagenes_producto WHERE id_producto = $producto_id";// AND respuesta IS NOT NULL";
+            $queryImagenes = $connection->prepare($sqlImagenes);
+            $queryImagenes->execute();
+
+            $imagenes = array();
+            while($row = $queryImagenes->fetch(PDO::FETCH_ASSOC)){
+                $imagenes[] = $row['id_imagen'];
+            }
+
             // Formato de los datos del producto
             $productoData = $producto->getArray();
             $productoData = [
@@ -149,6 +159,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'descripcion_larga' => $productoData['descripcion_larga'],
                 'caracteristicas' => json_decode($productoData['caracteristicas']),
                 'img' => $productoData['img'],
+                'imagenes' => $imagenes,
                 'preguntas' => array_map(function($pregunta) {
                     return [
                         'pregunta' => $pregunta['pregunta'],
@@ -333,7 +344,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $response->send();
         exit();
     }
-    //$id_usuario = trim($json_data->id_usuario);
+    $id_usuario = trim($json_data->id_usuario);
     $id_departamento = trim($json_data->id_departamento);
     $titulo = trim($json_data->titulo);
     $ubicacion = trim($json_data->ubicacion);
@@ -353,7 +364,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         $query = $connection->prepare("INSERT INTO productos 
             (id_usuario, id_departamento, titulo, ubicacion, descripcion_corta, descripcion_larga,
             precio, vendidos, disponibles, caracteristicas, habilitado, img, comentarios) 
-            VALUES ('$consulta_idUsuario', '$id_departamento', '$titulo', '$ubicacion', '$descripcion_corta',
+            VALUES ('$id_usuario', '$id_departamento', '$titulo', '$ubicacion', '$descripcion_corta',
             '$descripcion_larga', '$precio', '$vendidos', '$disponibles', '$caracteristicas',
             '$habilitado', '$img', '$comentarios')");
         $query->execute();
@@ -623,7 +634,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'PATCH'){
         if($actualiza_img === true) {
             $producto->setImg($json_data->img);
             $up_img = $producto->getImg();
-            $query->bindParam(':img', $up_img, PDO::PARAM_STR);
+            $query->bindParam(':img', $up_img, PDO::PARAM_INT);
         }
 
         $query->bindParam(':id', $producto_id, PDO::PARAM_INT);
@@ -714,6 +725,11 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     }
 
     try {
+        // Borra imagenes del producto
+        $sqlBIP = "DELETE FROM imagenes_producto WHERE id_producto = $producto_id";
+        $queryBIP = $connection->prepare($sqlBIP);
+        $queryBIP->execute(); 
+
         // Borra preguntas del producto
         // Consulta las preguntas
         $sql = "SELECT id FROM preguntas WHERE id_producto = $producto_id";
@@ -727,6 +743,20 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
             $queryP->bindParam(':id', $id_pregunta, PDO::PARAM_INT);
             $queryP->execute();
         }
+
+        /*
+        // Selecciona imagenes del producto
+        $sqlIP = "SELECT id_imagen FROM imagenes_productos WHERE id_producto = $producto_id";
+        $queryIP = $connection->prepare($sqlIP);
+        $queryIP->execute();
+        $ims = array();
+        while($row = $queryIP->fetch(PDO::FETCH_ASSOC)) {
+            $ims[] = $row['id_imagen'];
+        }
+        */
+        
+        // Borra imagenes
+
 
         // Borra las descripciones
         // Consulta las descropciones
@@ -774,7 +804,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'DELETE'){
     
         $response->setHttpStatusCode(500);
         $response->setSuccess(false);
-        $response->addMessage("Error al eliminar producto");
+        $response->addMessage("Error al eliminar producto $e");
         $response->send();
         exit();
     }

@@ -24,6 +24,12 @@ RewriteCond %(REQUEST_FILENAME) !-f
 RewriteRule ^productos$ Controllers/productosController.php [L]
 RewriteRule ^productos/id_depa=(.*)$ Controllers/productosController.php?id_depa=$1 [L]
 
+##Imagenes
+RewriteRule ^imagenes$ Controllers/imagenesController.php [L]
+RewriteRule ^imagenes/id=(.*)$ Controllers/imagenesController.php?id=$1 [L]
+RewriteRule ^imagenes?id=([0-9]+)$ Controllers/imagenesController.php?id=$1 [L]
+
+
 #Producto
 RewriteRule ^producto$ Controllers/productoController.php [L]
 RewriteRule ^producto?producto_id=([0-9]+)$ Controllers/productoController.php?producto_id=$1 [L]
