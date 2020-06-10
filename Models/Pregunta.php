@@ -95,7 +95,7 @@ class Pregunta {
     }
 
     public function setFechaPregunta($fecha_pregunta) {
-        //if ($fecha_pregunta === null || date_format(date_create_from_format('Y-m-d H:i', $fecha_pregunta), 'Y-m-d H:i') !== $fecha_pregunta) {
+        //if ($fecha_pregunta === null || date_format(date_create_from_format('Y-m-d', $fecha_pregunta), 'Y-m-d') !== $fecha_pregunta) {
         //    throw new PreguntaException("Error en la fecha en la cual fue realizada la pregunta");
         //}
         $this->_fecha_pregunta = $fecha_pregunta;
@@ -107,7 +107,7 @@ class Pregunta {
 
     public function setFechaRespuesta($fecha_respuesta) {
         /*
-        if ($fecha_respuesta !== null && date_format(date_create_from_format('Y-m-d H:i', $fecha_respuesta), 'Y-m-d H:i') !== $fecha_respuesta) {
+        if ($fecha_respuesta !== null && date_format(date_create_from_format('Y-m-d', $fecha_respuesta), 'Y-m-d') !== $fecha_respuesta) {
             throw new PreguntaException("Error en la fecha en la cual fue contestada la pregunta");
         }*/
         $this->_fecha_respuesta = $fecha_respuesta;

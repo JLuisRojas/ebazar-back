@@ -32,7 +32,7 @@ if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATIO
 }
 
 $accesstoken = $_SERVER['HTTP_AUTHORIZATION']; 
-
+/*
 try
 {
     //Se verifica que el token de acceso sea válido.
@@ -90,6 +90,7 @@ catch (PDOException $e)
     $response->send();
     exit();
 }
+*/
 
 // Obtener el carrito del usuario
 // GET server/carrito?id_usuario=# 
@@ -107,7 +108,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         try {
             // Obtine las descripciones del usuario
-            $sql = "SELECT id_producto FROM descripciones WHERE id_usuario = $id_usuario AND pagado = 0";
+            $sql = "SELECT id_producto, DATE_FORMAT(fecha, '%Y-%m-%d') fecha FROM descripciones WHERE id_usuario = $id_usuario";
             $query = $connection->prepare($sql);
             $query->execute();
 
@@ -116,29 +117,32 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             while($row = $query->fetch(PDO::FETCH_ASSOC)){
                 // obtener producto
                 $id_producto = $row['id_producto'];
+                $fecha_compra = $row['fecha'];
                 $sqlProducto = "SELECT * FROM productos WHERE id = $id_producto";
                 $queryProducto = $connection->prepare($sqlProducto);
                 $queryProducto->execute();
 
                 while($row = $queryProducto->fetch(PDO::FETCH_ASSOC)) {
                     $producto = Producto::fromArray($row);
-                    $productos[] = $producto->getArray();
+                    $temp = $producto->getArray();
+                    $temp['fecha_compra'] = $fecha_compra;
+                    $productos[] = $temp;
                 }
             }
-            $carritoData = [ 
-                'envio' => 50,
+            $comprasData = [ 
                 'productos' => array_map(function($producto) {
                     return [
                         'id' => $producto['id'],
                         'titulo' => $producto['titulo'],
                         'precio' => $producto['precio'],
-                        'img' => $producto['img']
+                        'img' => $producto['img'],
+                        'fecha_compra' => $producto['fecha_compra']
                     ];
                 }, $productos)
             ];
 
             // Response todo bien
-            $returnData['carrito'] = $carritoData;
+            $returnData['compras'] = $comprasData;
             $response = new Response();
             $response->setHttpStatusCode(200);
             $response->setSuccess(true);
@@ -197,7 +201,8 @@ elseif($_SERVER['REQUEST_METHOD'] === 'POST') {
     // cantidad: number
 
     // Si el JSON no contiene ninguna de las cosas necesarias, es porque hay un error y no viene toda la información.
-    if(!isset($json_data->id_usuario) || !isset($json_data->id_producto) || !isset($json_data->cantidad))
+    if(!isset($json_data->id_usuario) || !isset($json_data->id_producto) || !isset($json_data->cantidad)
+        || !isset($json_data->fecha))
     {
         $response = new Response ();
         $response->setHttpStatusCode(400);
@@ -205,6 +210,7 @@ elseif($_SERVER['REQUEST_METHOD'] === 'POST') {
         (!isset($json_data->id_usuario) ? $response->addMessage("El id de usuario es obligatorio") : false);
         (!isset($json_data->id_producto) ? $response->addMessage("El id de producto es obligatorio") : false);
         (!isset($json_data->cantidad) ? $response->addMessage("La cantidad es obligatorio") : false);
+        (!isset($json_data->fecha) ? $response->addMessage("La fecha es obligatoria") : false);
         $response->send();
         exit();
     }
@@ -212,14 +218,19 @@ elseif($_SERVER['REQUEST_METHOD'] === 'POST') {
     try
     {
         // Descripcion
-        $descripcion = new Descripcion($json_data->id_producto, $json_data->id_usuario, $json_data->cantidad);
+        $descripcion = new Descripcion($json_data->id_producto, $json_data->id_usuario, $json_data->cantidad,
+                                       $json_data->fecha);
 
         $id_producto = trim($descripcion->getIdProducto());
         $id_usuario = trim($descripcion->getIdUsuario());
         $cantidad = trim($descripcion->getCantidad());
-        $pagado = 0;
+        $fecha = trim($descripcion->getFecha());;
 
-        $query = $connection->prepare("INSERT INTO descripciones (id_usuario, cantidad, id_producto, pagado) VALUES ('$id_usuario', '$cantidad', '$id_producto', '$pagado')");
+        $query = $connection->prepare("INSERT INTO descripciones (id_usuario, cantidad, id_producto, fecha) VALUES (:id_usuario, :cantidad, :id_producto, STR_TO_DATE(:fecha, '%Y-%m-%d'))");
+        $query->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+        $query->bindParam(':cantidad', $cantidad, PDO::PARAM_INT);
+        $query->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
+        $query->bindParam(':fecha', $fecha, PDO::PARAM_STR);
         $query->execute();
 
         $rowCount = $query->rowCount();

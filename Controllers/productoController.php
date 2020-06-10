@@ -30,6 +30,7 @@ if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATIO
 
 $accesstoken = $_SERVER['HTTP_AUTHORIZATION']; 
 
+/*
 try
 {
     //Se verifica que el token de acceso sea válido.
@@ -87,6 +88,7 @@ catch (PDOException $e)
     $response->send();
     exit();
 }
+*/
 
 // GET server/producto?id=#
 if($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -136,6 +138,8 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
             // Formato de los datos del producto
             $productoData = $producto->getArray();
             $productoData = [
+                'id' => $productoData['id'],
+                'id_usuario' => $productoData['id_usuario'],
                 'titulo' => $productoData['titulo'],
                 'id_departamento' => $productoData['id_departamento'],
                 'precio' => $productoData['precio'],

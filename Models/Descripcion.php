@@ -5,11 +5,13 @@ class Descripcion {
     private $_id_producto;
     private $_id_usuario;
     private $_cantidad;
+    private $_fecha;
 
-    public function __construct($id_producto, $id_usuario, $cantidad) {
+    public function __construct($id_producto, $id_usuario, $cantidad, $fecha) {
         $this->setIdProducto($id_producto);
         $this->setIdUsuario($id_usuario);
         $this->setCantidad($cantidad);
+        $this->setFecha($fecha);
     }
 
     public function getArray() {
@@ -23,7 +25,7 @@ class Descripcion {
     }
 
     public static function fromArray($arr) {
-        return new Pregunta($arr['id_producto'], $arr['id_usuario'], $arr['cantidad']);
+        return new Pregunta($arr['id_producto'], $arr['id_usuario'], $arr['cantidad'], $arr['fecha']);
       }
 
     public function setIdProducto($id_producto) {
@@ -58,6 +60,17 @@ class Descripcion {
 
     public function getCantidad() {
         return $this->_cantidad;
+    }
+
+    public function setFecha($fecha) {
+        //if ($fecha === null || date_format(date_create_from_format('Y-m-d', $fecha), 'Y-m-d') !== $fecha) {
+        //    throw new DescripcionException("Error en la fecha");
+        //}
+        $this->_fecha = $fecha;
+    }
+
+    public function getFecha() {
+        return $this->_fecha;
     }
 }
 ?>

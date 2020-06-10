@@ -32,6 +32,7 @@ if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATIO
 
 $accesstoken = $_SERVER['HTTP_AUTHORIZATION']; 
 
+/*
 try
 {
     //Se verifica que el token de acceso sea válido.
@@ -89,7 +90,7 @@ catch (PDOException $e)
     $response->send();
     exit();
 }
-
+*/
 
 //GET buscar/id_depa=
 if(array_key_exists("id_depa", $_GET))

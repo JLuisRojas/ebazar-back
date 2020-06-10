@@ -46,6 +46,7 @@ if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATIO
 
 $accesstoken = $_SERVER['HTTP_AUTHORIZATION']; 
 
+/*
 try
 {
     //Se verifica que el token de acceso sea válido.
@@ -103,6 +104,7 @@ catch (PDOException $e)
     $response->send();
     exit();
 }
+*/
 
 // GET server/preguntas?id_producto=#
 if($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -119,7 +121,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         try {
             // Consulta las preguntas
-            $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d %H:%i') fecha_respuesta FROM preguntas WHERE id_producto = $id_producto";
+            $sql = "SELECT id, id_producto, id_usuario, pregunta, respuesta, DATE_FORMAT(fecha_pregunta, '%Y-%m-%d') fecha_pregunta, DATE_FORMAT(fecha_respuesta, '%Y-%m-%d') fecha_respuesta FROM preguntas WHERE id_producto = $id_producto";
             $query = $connection->prepare($sql);
             $query->execute();
 
