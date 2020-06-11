@@ -58,6 +58,7 @@ RewriteRule ^carrito/id_usuario=(.*)$ Controllers/carritoController.php?id_usuar
 #Usuarios
 RewriteRule ^usuarios$ Controllers/usuariosController.php [L]
 RewriteRule ^usuarios/id_usuario=(.*)$ Controllers/usuariosController.php?id_usuario=$1 [L]
+RewriteRule ^usuarios/nombre_usuario=(.*)$ Controllers/usuariosController.php?nombre_usuario=$1 [L]
 
 #Sesiones 
 RewriteRule ^sesiones$ Controllers/sesionesController.php [L]
@@ -65,3 +66,6 @@ RewriteRule ^sesiones/id_sesion=(.*)$ Controllers/sesionesController.php?id_sesi
 
 #Departamentos
 RewriteRule ^departamentos$ Controllers/departamentosController.php [L]
+
+#FAQ
+RewriteRule ^faq$ Controllers/faqController.php [L]

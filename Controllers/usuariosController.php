@@ -374,7 +374,189 @@
             exit();
         }
     }
+    //GET localhost/usuarios/nombre_usuario=(A-Z)
+    elseif(array_key_exists('nombre_usuario', $_GET))
+    {
+        $nombre_usuario = $_GET['nombre_usuario'];
+
+        if ($nombre_usuario === '' || $nombre_usuario === null) 
+        {
+            $response = new Response();
     
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            ($nombre_usuario === '' ? $response->addMessage("Nombre del usuario no puede estar vacío") : false);
+            ($nombre_usuario === null ? $response->addMessage("Nombre del usuario no puede ser nulo") : false);
+            $response->send();
+            exit();
+        }
+
+        if($_SERVER['REQUEST_METHOD'] === 'PATCH') 
+        {
+            try
+            {
+                if ($_SERVER['CONTENT_TYPE'] !== 'application/json') 
+                {
+                    $response = new Response();
+                    $response->setHttpStatusCode(400);
+                    $response->setSuccess(false);
+                    $response->addMessage("Encabezado Content Type no es JSON");
+                    $response->send();
+                    exit();
+                }
+
+                $patchData = file_get_contents('php://input');
+
+                if(!$jsonData = json_decode($patchData)) 
+                {
+                    $response = new Response();
+                    $response->setHttpStatusCode(400);
+                    $response->setSuccess(false);
+                    $response->addMessage("Cuerpo de la solicitud no es un JSON válido");
+                    $response->send();
+                    exit();
+                }
+
+                $actualiza_contrasena = false;
+
+                $campos_query = "";
+
+                if (isset($json_data->contrasena)) 
+                {
+                    echo "hola";
+                    $actualiza_contrasena = true;
+                    $campos_query .= "contrasena = :contrasena, ";
+                }
+
+                if ($actualiza_contrasena === false) 
+                {
+                    $response = new Response();
+                    $response->setHttpStatusCode(400);
+                    $response->setSuccess(false);
+                    $response->addMessage("No hay campos para actualizar");
+                    $response->send();
+                    exit();
+                }
+
+                $query = $connection->prepare('SELECT id_usuario, num_telefono, domicilio, nombre, nombre_usuario, foto_usuario, 
+                        email, contrasena, tipo_usuario FROM usuarios WHERE nombre_usuario = :nombre_usuario');
+                $query->bindParam(':inombre_usuario', $nombre_usuario, PDO::PARAM_STR);
+                $query->execute();
+
+                $rowCount = $query->rowCount();
+            
+                if($rowCount === 0) 
+                {
+                    $response = new Response();
+                    $response->setHttpStatusCode(404);
+                    $response->setSuccess(false);
+                    $response->addMessage("No se encontró el usuario");
+                    $response->send();
+                    exit();
+                }
+            
+                while($row = $query->fetch(PDO::FETCH_ASSOC))
+                {
+                    $usuario = new Usuario($row['id_usuario'], $row['num_telefono'], $row['domicilio'], $row['nombre'], 
+                        $row['nombre_usuario'], $row['foto_usuario'], $row['email'], $row['contrasena'], $row['tipo_usuario']);
+                }
+
+                $cadena_query = 'UPDATE usuarios SET ' . $campos_query . ' WHERE nombre_usuario = :nombre_usuario';
+                $query = $connection->prepare($cadena_query);
+            
+                if($actualiza_contrasena === true) 
+                {
+                    $usuario->setContrasena($json_data->contrasena);
+                    $up_contrasena = $usuario->getContrasena();
+                    $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+                    $query->bindParam(':contrasena', $contrasena_hash, PDO::PARAM_STR);
+                }
+
+                $query->bindParam(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
+                $query->execute();
+
+                $rowCount = $query->rowCount();
+
+                if ($rowCount === 0) {
+                    $response = new Response();
+                    $response->setHttpStatusCode(500);
+                    $response->setSuccess(false);
+                    $response->addMessage("Error al actualizar información");
+                    $response->send();
+                    exit();
+                }
+
+                $query = $connection->prepare('SELECT id_usuario, num_telefono, domicilio, nombre, nombre_usuario, foto_usuario, 
+                        email, contrasena, tipo_usuario FROM usuarios WHERE nombre_usuario = :nombre_usuario');
+                        $query->bindParam(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
+                        $query->execute();
+            
+                        $rowCount = $query->rowCount();
+            
+                if($rowCount === 0) 
+                {
+                    $response = new Response();
+                    $response->setHttpStatusCode(404);
+                    $response->setSuccess(false);
+                    $response->addMessage("No se encontró la información después de actulizar");
+                    $response->send();
+                    exit();
+                }
+
+                $usuario = array();
+            
+                while($row = $query->fetch(PDO::FETCH_ASSOC))
+                {
+                    $usuario = new Usuario($row['id_usuario'], $row['num_telefono'], $row['domicilio'], $row['nombre'], 
+                    $row['nombre_usuario'], $row['foto_usuario'], $row['email'], $row['contrasena'], $row['tipo_usuario']);
+                    
+                    $usuarios[] = $usuario->getArray();
+                }
+
+                $returnData = array();
+                $returnData['total_registros'] = $rowCount;
+                $returnData['usuarios'] = $usuarios;
+
+                $response = new Response();
+                $response->setHttpStatusCode(200);
+                $response->setSuccess(true);
+                $response->addMessage("Datos actualizads");
+                $response->setData($returnData);
+                $response->send();
+                exit();
+
+            }
+            catch(TareaException $e) {
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage($e->getMessage());
+                $response->send();
+                exit();
+            }
+            catch(PDOException $e) {
+                error_log("Error en BD - " . $e);
+    
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Error en BD al actualizar la información");
+                $response->send();
+                exit();
+            }
+      
+        }
+        else
+            {
+            $response = new Response();
+            $response->setHttpStatusCode(405);
+            $response->setSuccess(false);
+            $response->addMessage("Método no permitido");
+            $response->send();
+            exit();
+            }
+       
+    }
     elseif (empty($_GET))
     {
         //GET localhost/usuarios

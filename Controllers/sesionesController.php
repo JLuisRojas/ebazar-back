@@ -252,6 +252,7 @@
             exit();
         }
     }
+   
     elseif (empty($_GET)) 
     {
         if($_SERVER['REQUEST_METHOD'] !== 'POST') 
@@ -302,7 +303,7 @@
             $contrasena = $jsonData->contrasena;
 
             //Hacemos la consulta con los datos proporcionados por el usuario.
-            $query = $connection->prepare('SELECT id_usuario, nombre_usuario, contrasena, activo FROM usuarios WHERE nombre_usuario 
+            $query = $connection->prepare('SELECT id_usuario, nombre_usuario, contrasena, activo, tipo_usuario FROM usuarios WHERE nombre_usuario 
             = :nombre_usuario');
             $query->bindParam(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
             $query->execute();
@@ -327,6 +328,7 @@
             $consulta_nombre_usuario = $row['nombre_usuario'];
             $consulta_contrasena = $row['contrasena'];
             $consulta_activo = $row['activo'];
+            $consulta_tipo_usuario = $row['tipo_usuario'];
 
             //Confirmamos que el usuario está activo.
             if ($consulta_activo !== 'SI') 
@@ -391,6 +393,7 @@
             $returnData['id_usuario'] = $consulta_id_usuario;
             $returnData['id_sesion'] = intval($ultimoID);
             $returnData['id_user'] = $consulta_id_usuario;
+            $returnData['tipo_usuario'] = $consulta_tipo_usuario;
             $returnData['token_acceso'] = $token_acceso;
             $returnData['caducidad_token_acceso'] = $caducidad_tacceso_s;
             $returnData['token_actualizacion'] = $token_actualizacion;
