@@ -303,7 +303,7 @@
                 $response->send();
                 exit();
             }
-            catch(TareaException $e) {
+            catch(UsuarioException $e) {
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
@@ -391,43 +391,40 @@
             exit();
         }
 
-        if($_SERVER['REQUEST_METHOD'] === 'PATCH') 
+        if($_SERVER['REQUEST_METHOD'] === 'PATCH')
         {
-            try
-            {
-                if ($_SERVER['CONTENT_TYPE'] !== 'application/json') 
-                {
+            try {
+                if ($_SERVER['CONTENT_TYPE'] !== 'application/json'){
                     $response = new Response();
                     $response->setHttpStatusCode(400);
                     $response->setSuccess(false);
-                    $response->addMessage("Encabezado Content Type no es JSON");
+                    $response->addMessage('Encabezado "Content type" no es JSON');
                     $response->send();
                     exit();
                 }
-
+    
                 $patchData = file_get_contents('php://input');
-
-                if(!$jsonData = json_decode($patchData)) 
-                {
+    
+                if (!$json_data = json_decode($patchData)) {
                     $response = new Response();
                     $response->setHttpStatusCode(400);
                     $response->setSuccess(false);
-                    $response->addMessage("Cuerpo de la solicitud no es un JSON válido");
+                    $response->addMessage('El cuerpo de la solicitud no es un JSON válido');
                     $response->send();
                     exit();
                 }
-
+    
                 $actualiza_contrasena = false;
-
+    
                 $campos_query = "";
 
-                if (isset($json_data->contrasena)) 
-                {
-                    echo "hola";
+                if (isset($json_data->contrasena)) {
                     $actualiza_contrasena = true;
                     $campos_query .= "contrasena = :contrasena, ";
                 }
-
+    
+                $campos_query = rtrim($campos_query, ", ");
+    
                 if ($actualiza_contrasena === false) 
                 {
                     $response = new Response();
@@ -439,14 +436,13 @@
                 }
 
                 $query = $connection->prepare('SELECT id_usuario, num_telefono, domicilio, nombre, nombre_usuario, foto_usuario, 
-                        email, contrasena, tipo_usuario FROM usuarios WHERE nombre_usuario = :nombre_usuario');
-                $query->bindParam(':inombre_usuario', $nombre_usuario, PDO::PARAM_STR);
+                email, contrasena, tipo_usuario FROM usuarios WHERE nombre_usuario = :nombre_usuario');
+                $query->bindParam(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
                 $query->execute();
-
+    
                 $rowCount = $query->rowCount();
-            
-                if($rowCount === 0) 
-                {
+    
+                if($rowCount === 0) {
                     $response = new Response();
                     $response->setHttpStatusCode(404);
                     $response->setSuccess(false);
@@ -454,29 +450,28 @@
                     $response->send();
                     exit();
                 }
-            
-                while($row = $query->fetch(PDO::FETCH_ASSOC))
-                {
+    
+                while($row = $query->fetch(PDO::FETCH_ASSOC)){
                     $usuario = new Usuario($row['id_usuario'], $row['num_telefono'], $row['domicilio'], $row['nombre'], 
-                        $row['nombre_usuario'], $row['foto_usuario'], $row['email'], $row['contrasena'], $row['tipo_usuario']);
+                    $row['nombre_usuario'], $row['foto_usuario'], $row['email'], $row['contrasena'], $row['tipo_usuario']);
                 }
-
+    
                 $cadena_query = 'UPDATE usuarios SET ' . $campos_query . ' WHERE nombre_usuario = :nombre_usuario';
                 $query = $connection->prepare($cadena_query);
-            
-                if($actualiza_contrasena === true) 
-                {
+    
+                
+                if($actualiza_contrasena === true) {
                     $usuario->setContrasena($json_data->contrasena);
-                    $up_contrasena = $usuario->getContrasena();
-                    $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+                    $up_contrasena = trim($usuario->getContrasena());
+                    $contrasena_hash = password_hash($up_contrasena, PASSWORD_DEFAULT);
                     $query->bindParam(':contrasena', $contrasena_hash, PDO::PARAM_STR);
                 }
-
+    
                 $query->bindParam(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
                 $query->execute();
-
+    
                 $rowCount = $query->rowCount();
-
+    
                 if ($rowCount === 0) {
                     $response = new Response();
                     $response->setHttpStatusCode(500);
@@ -487,14 +482,13 @@
                 }
 
                 $query = $connection->prepare('SELECT id_usuario, num_telefono, domicilio, nombre, nombre_usuario, foto_usuario, 
-                        email, contrasena, tipo_usuario FROM usuarios WHERE nombre_usuario = :nombre_usuario');
-                        $query->bindParam(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
-                        $query->execute();
-            
-                        $rowCount = $query->rowCount();
-            
-                if($rowCount === 0) 
-                {
+                email, contrasena, tipo_usuario FROM usuarios WHERE nombre_usuario = :nombre_usuario');
+                $query->bindParam(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
+                $query->execute();
+    
+                $rowCount = $query->rowCount();
+    
+                if($rowCount === 0) {
                     $response = new Response();
                     $response->setHttpStatusCode(404);
                     $response->setSuccess(false);
@@ -502,9 +496,9 @@
                     $response->send();
                     exit();
                 }
-
+    
                 $usuario = array();
-            
+    
                 while($row = $query->fetch(PDO::FETCH_ASSOC))
                 {
                     $usuario = new Usuario($row['id_usuario'], $row['num_telefono'], $row['domicilio'], $row['nombre'], 
@@ -512,11 +506,11 @@
                     
                     $usuarios[] = $usuario->getArray();
                 }
-
+    
                 $returnData = array();
                 $returnData['total_registros'] = $rowCount;
                 $returnData['usuarios'] = $usuarios;
-
+    
                 $response = new Response();
                 $response->setHttpStatusCode(200);
                 $response->setSuccess(true);
@@ -524,9 +518,8 @@
                 $response->setData($returnData);
                 $response->send();
                 exit();
-
             }
-            catch(TareaException $e) {
+            catch(UsuarioException $e) {
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
@@ -544,7 +537,6 @@
                 $response->send();
                 exit();
             }
-      
         }
         else
             {
